@@ -11,6 +11,14 @@ Funziona tramite la **Spotify Web API**, quindi controlla il *dispositivo attivo
 del tuo account: PC, telefono o smart speaker (es. Amazon Echo).
 
 <p align="center">
+  <a href="https://github.com/giosci1994/widget-spotify/actions/workflows/release.yml"><img src="https://github.com/giosci1994/widget-spotify/actions/workflows/release.yml/badge.svg" alt="Build" /></a>
+  <a href="https://github.com/giosci1994/widget-spotify/releases/latest"><img src="https://img.shields.io/github/v/release/giosci1994/widget-spotify" alt="Release" /></a>
+  <img src="https://img.shields.io/github/downloads/giosci1994/widget-spotify/total" alt="Downloads" />
+  <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Windows" />
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/giosci1994/widget-spotify" alt="License" /></a>
+</p>
+
+<p align="center">
   <img src="docs/screenshots/widget.png" width="420" alt="La card del widget nell'angolo dello schermo" />
 </p>
 

@@ -1,0 +1,59 @@
+name: Build & Release
+
+# Builda gli eseguibili a ogni tag "vX.Y.Z" e pubblica la release con gli .exe.
+# Puoi anche lanciarlo a mano (workflow_dispatch): in quel caso builda soltanto
+# e allega gli artefatti al run, senza creare release.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Il tag è l'unica fonte di verità per la versione: allinea package.json.
+      - name: Set version from tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: npm version "${GITHUB_REF_NAME#v}" --no-git-tag-version --allow-same-version
+
+      - name: Generate icons
+        run: node scripts/make-icon.js
+
+      - name: Build installer + portable
+        run: npx electron-builder --publish never
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.exe \
+            --title "Widget Spotify $GITHUB_REF_NAME" \
+            --generate-notes \
+          || gh release upload "$GITHUB_REF_NAME" dist/*.exe --clobber
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: widget-spotify-exe
+          path: dist/*.exe
+          if-no-files-found: error
