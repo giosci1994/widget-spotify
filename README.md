@@ -32,6 +32,7 @@ del tuo account: PC, telefono o smart speaker (es. Amazon Echo).
 - 🖥️ **Selettore di dispositivo**: sposta la musica su Echo / PC / telefono
 - 🪟 **Da system tray**: click per mostrare/nascondere, si chiude da sola quando clicchi altrove
 - ⚙️ **Impostazioni**: angolo di comparsa, dissolvenza, trasparenza, copertina come sfondo, avvio all'accensione
+- 🔄 **Aggiornamento automatico** dalle release GitHub (versione installata)
 - 🔒 **Sicuro**: login OAuth **PKCE** (nessun *client secret*), refresh token cifrato con DPAPI di Windows
 
 <p align="center">
@@ -56,13 +57,23 @@ del tuo account: PC, telefono o smart speaker (es. Amazon Echo).
 ## 🚀 Installazione (utente)
 
 1. Scarica l'ultima release dalla pagina **[Releases](../../releases)**:
-   - `Widget Spotify Setup x.y.z.exe` → installer, oppure
+   - `WidgetSpotify-Setup-x.y.z.exe` → **installer** (consigliato: si auto-aggiorna), oppure
    - `WidgetSpotify-portable-x.y.z.exe` → eseguibile singolo, senza installare.
 2. Avvia. Compare l'icona verde nella tray.
 3. Registra la tua app Spotify (passo sotto) e **incolla il Client ID** nel widget.
 
 > Nota: l'eseguibile non è firmato, quindi Windows SmartScreen potrebbe mostrare
 > un avviso — *Ulteriori informazioni → Esegui comunque*.
+
+### 🔄 Aggiornamenti automatici
+
+La versione **installata** controlla le release di GitHub all'avvio e ogni 6 ore.
+Se trova una versione nuova la scarica in background e nel menu della tray compare
+**"⬆ Riavvia e aggiorna"** (più una notifica di Windows). Puoi anche forzare il
+controllo con **"Controlla aggiornamenti"** dal menu.
+
+> La versione **portable non si auto-aggiorna** (limite di `electron-updater`):
+> se la usi, riscarica l'exe a mano quando esce una versione nuova.
 
 ### Registra la tua app Spotify (gratis)
 

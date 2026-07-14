@@ -7,8 +7,10 @@ const {
   nativeImage,
   screen,
   clipboard,
+  Notification,
 } = require('electron');
 const path = require('path');
+const { autoUpdater } = require('electron-updater');
 const auth = require('./auth');
 const spotify = require('./spotify');
 const settings = require('./settings');
@@ -19,6 +21,7 @@ let settingsWin = null;
 let pollTimer = null;
 let fadeTimer = null;
 let lastAuthUrl = null;
+let updateReadyVersion = null;
 
 const WIN_WIDTH = 372;
 const WIN_HEIGHT = 216;
@@ -216,40 +219,93 @@ function stopPolling() {
   pollTimer = null;
 }
 
+function trayMenu() {
+  const items = [
+    { label: 'Mostra / Nascondi', click: toggleWindow },
+    { label: 'Impostazioni…', click: openSettings },
+    { type: 'separator' },
+  ];
+
+  // Voce che compare solo quando un aggiornamento è stato scaricato
+  if (updateReadyVersion) {
+    items.push({
+      label: `⬆ Riavvia e aggiorna (v${updateReadyVersion})`,
+      click: () => autoUpdater.quitAndInstall(),
+    });
+  } else {
+    items.push({
+      label: 'Controlla aggiornamenti',
+      enabled: app.isPackaged,
+      click: () => autoUpdater.checkForUpdates().catch((e) => console.error(e)),
+    });
+  }
+  items.push({ type: 'separator' });
+
+  items.push({
+    label: 'Accedi / Ri-autentica',
+    click: async () => {
+      auth.clearAuth();
+      try {
+        await auth.startAuthFlow((url) => {
+          lastAuthUrl = url;
+          try {
+            clipboard.writeText(url);
+          } catch (e) {
+            /* clipboard non disponibile */
+          }
+        });
+        startPolling();
+      } catch (e) {
+        console.error(e);
+      }
+    },
+  });
+  items.push({ type: 'separator' });
+  items.push({ label: 'Esci', click: () => app.exit(0) });
+
+  return Menu.buildFromTemplate(items);
+}
+
+function refreshTrayMenu() {
+  if (tray && !tray.isDestroyed()) tray.setContextMenu(trayMenu());
+}
+
 function buildTray() {
   const icon = nativeImage.createFromPath(
     path.join(__dirname, '..', 'assets', 'tray.png')
   );
   tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon);
   tray.setToolTip('Widget Spotify');
-  const menu = Menu.buildFromTemplate([
-    { label: 'Mostra / Nascondi', click: toggleWindow },
-    { label: 'Impostazioni…', click: openSettings },
-    { type: 'separator' },
-    {
-      label: 'Accedi / Ri-autentica',
-      click: async () => {
-        auth.clearAuth();
-        try {
-          await auth.startAuthFlow((url) => {
-            lastAuthUrl = url;
-            try {
-              clipboard.writeText(url);
-            } catch (e) {
-              /* clipboard non disponibile */
-            }
-          });
-          startPolling();
-        } catch (e) {
-          console.error(e);
-        }
-      },
-    },
-    { type: 'separator' },
-    { label: 'Esci', click: () => app.exit(0) },
-  ]);
-  tray.setContextMenu(menu);
+  refreshTrayMenu();
   tray.on('click', toggleWindow);
+}
+
+// Aggiornamento automatico dalle release GitHub (solo app installata, non in dev).
+function setupAutoUpdate() {
+  if (!app.isPackaged) return;
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on('update-downloaded', (info) => {
+    updateReadyVersion = info.version;
+    refreshTrayMenu();
+    tray.setToolTip(`Widget Spotify — aggiornamento v${info.version} pronto`);
+    if (Notification.isSupported()) {
+      const n = new Notification({
+        title: 'Aggiornamento pronto',
+        body: `Widget Spotify v${info.version} è pronto. Riavvia per installarlo.`,
+      });
+      n.on('click', () => autoUpdater.quitAndInstall());
+      n.show();
+    }
+  });
+
+  autoUpdater.on('error', (e) => console.error('auto-update:', e && e.message));
+
+  autoUpdater.checkForUpdates().catch(() => {});
+  // ricontrolla ogni 6 ore
+  setInterval(() => autoUpdater.checkForUpdates().catch(() => {}), 6 * 60 * 60 * 1000);
 }
 
 ipcMain.handle('control', async (_e, action, payload = {}) => {
@@ -346,6 +402,7 @@ if (!gotLock) {
   app.whenReady().then(async () => {
     createWindow();
     buildTray();
+    setupAutoUpdate();
     if (auth.hasStoredAuth()) {
       try {
         await auth.refreshAccessToken();
