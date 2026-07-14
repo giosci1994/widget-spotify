@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none';"
+    />
+    <title>Impostazioni · Widget Spotify</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      :root { --green: #1db954; --muted: #a7a7b0; --line: rgba(255,255,255,.08); }
+      html, body {
+        background: #17171c; color: #fff;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        user-select: none; height: 100vh; overflow: hidden;
+      }
+      header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 16px; -webkit-app-region: drag;
+        border-bottom: 1px solid var(--line);
+      }
+      header h1 { font-size: 14px; font-weight: 700; letter-spacing: .01em; }
+      .close {
+        -webkit-app-region: no-drag;
+        width: 28px; height: 28px; border: none; border-radius: 8px;
+        background: transparent; color: var(--muted); cursor: pointer; font-size: 16px;
+      }
+      .close:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+      main { padding: 8px 16px 16px; }
+      .row {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px; padding: 15px 0; border-bottom: 1px solid var(--line);
+      }
+      .row:last-child { border-bottom: none; }
+      .row .label { font-size: 13.5px; font-weight: 600; }
+      .row .desc { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
+      .row .left { flex: 1 1 auto; min-width: 0; }
+
+      /* Corner picker 2x2 */
+      .corners {
+        display: grid; grid-template-columns: 34px 34px; grid-template-rows: 26px 26px;
+        gap: 5px; flex: 0 0 auto;
+      }
+      .corner {
+        border: 1px solid var(--line); background: #23232b; border-radius: 6px;
+        cursor: pointer; position: relative; padding: 0;
+      }
+      .corner:hover { border-color: rgba(255,255,255,.25); }
+      .corner .dot {
+        position: absolute; width: 12px; height: 8px; border-radius: 2px;
+        background: var(--muted);
+      }
+      .corner[data-corner="top-left"] .dot { top: 4px; left: 4px; }
+      .corner[data-corner="top-right"] .dot { top: 4px; right: 4px; }
+      .corner[data-corner="bottom-left"] .dot { bottom: 4px; left: 4px; }
+      .corner[data-corner="bottom-right"] .dot { bottom: 4px; right: 4px; }
+      .corner.on { border-color: var(--green); background: rgba(29,185,84,.14); }
+      .corner.on .dot { background: var(--green); }
+
+      /* Switch */
+      .switch { position: relative; width: 42px; height: 24px; flex: 0 0 auto; cursor: pointer; }
+      .switch input { opacity: 0; width: 0; height: 0; }
+      .slider {
+        position: absolute; inset: 0; background: #3a3a44; border-radius: 999px;
+        transition: background .15s;
+      }
+      .slider::before {
+        content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px;
+        background: #fff; border-radius: 50%; transition: transform .15s;
+      }
+      .switch input:checked + .slider { background: var(--green); }
+      .switch input:checked + .slider::before { transform: translateX(18px); }
+
+      /* Range */
+      .range-wrap { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+      input[type="range"] {
+        -webkit-appearance: none; appearance: none; width: 130px; height: 4px;
+        background: #3a3a44; border-radius: 3px; outline: none;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+        background: var(--green); cursor: pointer;
+      }
+      .range-val { font-size: 12px; color: var(--muted); width: 34px; text-align: right; }
+
+      footer { padding: 0 16px; font-size: 11px; color: var(--muted); line-height: 1.4; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Impostazioni</h1>
+      <button class="close" id="close" title="Chiudi">✕</button>
+    </header>
+
+    <main>
+      <div class="row">
+        <div class="left">
+          <div class="label">Angolo di comparsa</div>
+          <div class="desc">Dove appare il widget sullo schermo.</div>
+        </div>
+        <div class="corners" id="corners">
+          <button class="corner" data-corner="top-left"><span class="dot"></span></button>
+          <button class="corner" data-corner="top-right"><span class="dot"></span></button>
+          <button class="corner" data-corner="bottom-left"><span class="dot"></span></button>
+          <button class="corner" data-corner="bottom-right"><span class="dot"></span></button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="left">
+          <div class="label">Dissolvenza</div>
+          <div class="desc">Apri e chiudi con una transizione morbida.</div>
+        </div>
+        <label class="switch"><input type="checkbox" id="fade" /><span class="slider"></span></label>
+      </div>
+
+      <div class="row">
+        <div class="left">
+          <div class="label">Trasparenza</div>
+          <div class="desc">Opacità del widget.</div>
+        </div>
+        <div class="range-wrap">
+          <input type="range" id="opacity" min="50" max="100" step="5" />
+          <span class="range-val" id="opacityVal">100%</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="left">
+          <div class="label">Copertina come sfondo</div>
+          <div class="desc">Usa la cover dell'album come sfondo sfocato.</div>
+        </div>
+        <label class="switch"><input type="checkbox" id="albumBackground" /><span class="slider"></span></label>
+      </div>
+
+      <div class="row">
+        <div class="left">
+          <div class="label">Avvia all'accensione</div>
+          <div class="desc">Parte in automatico all'avvio di Windows.</div>
+        </div>
+        <label class="switch"><input type="checkbox" id="autostart" /><span class="slider"></span></label>
+      </div>
+    </main>
+
+    <footer>Le modifiche si applicano subito. Riapri il widget per vederle.</footer>
+
+    <script src="settings.js"></script>
+  </body>
+</html>

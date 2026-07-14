@@ -1,0 +1,46 @@
+{
+  "name": "widget-spotify",
+  "version": "0.1.0",
+  "description": "Mini-telecomando Spotify richiamabile dalla barra delle applicazioni di Windows",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "make-icon": "node scripts/make-icon.js",
+    "dist": "npm run make-icon && electron-builder",
+    "pack": "npm run make-icon && electron-builder --dir"
+  },
+  "author": "giosci1994",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^43.1.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.giosci1994.widgetspotify",
+    "productName": "Widget Spotify",
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "config.example.json",
+      "!config.json",
+      "!**/*.map"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "Widget Spotify"
+    },
+    "portable": {
+      "artifactName": "WidgetSpotify-portable-${version}.${ext}"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+out/
+
+# Configurazione personale con il Client ID: NON pubblicare
+config.json
+
+# Cartella di lavoro screenshot (gli originali "puliti" sono in docs/screenshots/)
+pictures/
+
+*.log
+.DS_Store
+Thumbs.db
+
+# Config locale Claude Code
+.claude/

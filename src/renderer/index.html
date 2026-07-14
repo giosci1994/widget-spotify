@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; base-uri 'none'; form-action 'none';"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>Widget Spotify</title>
+  </head>
+  <body>
+    <div class="card" id="card">
+      <div class="card-bg hidden" id="bg"></div>
+      <div class="card-scrim hidden" id="scrim"></div>
+
+      <!-- Stato: riproduzione -->
+      <section id="player" class="hidden">
+        <div class="top">
+          <img id="cover" class="cover" alt="" />
+          <div class="meta">
+            <div class="title" id="title">—</div>
+            <div class="artist" id="artist"></div>
+            <div class="album" id="album"></div>
+          </div>
+          <button class="device-btn" id="deviceBtn" title="Cambia dispositivo">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path fill="currentColor" d="M4 4h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 15h12v2H6v-2Z"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="progress" id="progress">
+          <span class="time" id="cur">0:00</span>
+          <div class="bar" id="bar"><div class="bar-bg"><div class="bar-fill" id="fill"></div><div class="bar-knob" id="knob"></div></div></div>
+          <span class="time" id="dur">0:00</span>
+        </div>
+
+        <div class="controls">
+          <button class="ctl small" id="shuffle" title="Shuffle">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.42-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+          </button>
+          <button class="ctl" id="prev" title="Precedente">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7 6h2v12H7V6Zm3.5 6L18 6.5v11L10.5 12Z"/></svg>
+          </button>
+          <button class="ctl play" id="playPause" title="Play/Pausa">
+            <svg id="playIcon" viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M8 5v14l11-7L8 5Z"/></svg>
+            <svg id="pauseIcon" class="hidden" viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M6 5h4v14H6V5Zm8 0h4v14h-4V5Z"/></svg>
+          </button>
+          <button class="ctl" id="next" title="Successivo">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M15 6h2v12h-2V6ZM6 6l7.5 6L6 18V6Z"/></svg>
+          </button>
+          <button class="ctl small" id="repeat" title="Ripeti">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+            <span class="repeat-one hidden" id="repeatOne">1</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Stato: nessuna riproduzione -->
+      <section id="idle" class="center hidden">
+        <div class="idle-dot"></div>
+        <div class="idle-title">Nessuna riproduzione attiva</div>
+        <div class="idle-sub">Avvia una canzone su Spotify, oppure scegli un dispositivo.</div>
+        <button class="pill" id="idleDevice">Scegli dispositivo</button>
+      </section>
+
+      <!-- Stato: login -->
+      <section id="login" class="center hidden">
+        <div class="idle-dot"></div>
+        <div class="idle-title">Accedi a Spotify</div>
+
+        <!-- Manca il Client ID: si inserisce qui -->
+        <div id="needClientId" class="login-block hidden">
+          <div class="idle-sub">Incolla il tuo <b>Client ID</b> di Spotify (vedi README).</div>
+          <div class="cid-row">
+            <input id="clientIdInput" class="cid-input" type="text" placeholder="Client ID" spellcheck="false" autocomplete="off" />
+            <button class="pill green compact" id="saveClientIdBtn">Salva</button>
+          </div>
+        </div>
+
+        <!-- Client ID presente: si può accedere -->
+        <div id="canLogin" class="login-block hidden">
+          <div class="idle-sub">Autorizza il widget per controllare la riproduzione.</div>
+          <button class="pill green" id="loginBtn">Accedi con Spotify</button>
+          <button class="link-btn hidden" id="copyLinkBtn">Il browser dà errore? Copia il link di accesso</button>
+          <div class="idle-sub small hidden" id="copyHint">Incollalo nel browser del PC dove sei già loggato a Spotify.</div>
+        </div>
+      </section>
+
+      <!-- Popover dispositivi -->
+      <div id="devicePop" class="device-pop hidden">
+        <div class="device-pop-title">Riproduci su</div>
+        <div id="deviceList" class="device-list"></div>
+      </div>
+
+      <div id="toast" class="toast hidden"></div>
+    </div>
+    <script src="renderer.js"></script>
+  </body>
+</html>
