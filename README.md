@@ -28,6 +28,7 @@ account: PC, phone or a smart speaker (e.g. Amazon Echo).
 - 🎧 **Now playing**: album art, title, artist, album
 - ⏯️ **Controls**: play/pause, previous/next, shuffle, repeat
 - 🎚️ **Clickable progress bar** to seek, with smooth interpolation
+- 🔊 **Volume**: slider + mute for the active device
 - 🖥️ **Device switcher**: move playback to Echo / PC / phone
 - 🪟 **Tray-native**: click to show/hide, auto-hides when you click away
 - ⚙️ **Settings**: screen corner, fade, transparency, album-art background, launch at startup
@@ -176,6 +177,7 @@ del tuo account: PC, telefono o smart speaker (es. Amazon Echo).
 - 🎧 **Now playing**: copertina, titolo, artista, album
 - ⏯️ **Controlli**: play/pausa, avanti/indietro, shuffle, repeat
 - 🎚️ **Barra cliccabile** per il seek, con avanzamento animato
+- 🔊 **Volume**: slider + muto sul dispositivo attivo
 - 🖥️ **Selettore di dispositivo**: sposta la musica su Echo / PC / telefono
 - 🪟 **Da system tray**: click per mostrare/nascondere, si chiude da sola quando clicchi altrove
 - ⚙️ **Impostazioni**: angolo di comparsa, dissolvenza, trasparenza, copertina come sfondo, avvio all'accensione

@@ -11,6 +11,10 @@ let baseline = null;       // { progressMs, durationMs, isPlaying, at }
 let seeking = false;
 let toastTimer = null;
 let uiSettings = { albumBackground: false };
+let volDragging = false;
+let volLockUntil = 0;   // ignora gli update in arrivo subito dopo una modifica
+let lastVolume = 40;    // per il ripristino dopo il muto
+let volThrottle = 0;
 
 function show(name) {
   for (const k in sections) sections[k].classList.toggle('hidden', k !== name);
@@ -92,6 +96,10 @@ function renderPlayback(s) {
   // dispositivo
   $('deviceBtn').classList.toggle('active', !!s.device);
   $('dur').textContent = fmt(s.durationMs);
+
+  // volume
+  const vol = s.device ? s.device.volume : null;
+  renderVolume(vol);
 }
 
 // Interpolazione locale della barra tra un poll e l'altro
@@ -180,6 +188,84 @@ window.addEventListener('mouseup', (e) => {
     ctl('seek', { positionMs: posMs });
   }
 });
+
+/* ---------- Volume ---------- */
+
+const volume = $('volume');
+const volBar = $('volBar');
+
+function setVolIcon(v) {
+  $('volHigh').classList.toggle('hidden', !(v > 50));
+  $('volLow').classList.toggle('hidden', !(v > 0 && v <= 50));
+  $('volMute').classList.toggle('hidden', v > 0);
+}
+
+function paintVolume(v) {
+  $('volFill').style.width = v + '%';
+  $('volKnob').style.left = v + '%';
+  $('volVal').textContent = v + '%';
+  setVolIcon(v);
+}
+
+// Chiamata dai poll: aggiorna solo se non stai trascinando e non è nel "lock"
+function renderVolume(v) {
+  const available = typeof v === 'number';
+  volume.classList.toggle('disabled', !available);
+  if (!available) {
+    $('volVal').textContent = '—';
+    return;
+  }
+  if (volDragging || Date.now() < volLockUntil) return;
+  if (v > 0) lastVolume = v;
+  paintVolume(v);
+}
+
+function volFromEvent(e) {
+  const rect = volBar.getBoundingClientRect();
+  let ratio = (e.clientX - rect.left) / rect.width;
+  ratio = Math.max(0, Math.min(1, ratio));
+  return Math.round(ratio * 100);
+}
+
+function sendVolume(v) {
+  volLockUntil = Date.now() + 1500;
+  ctl('volume', { percent: v });
+}
+
+volBar.addEventListener('mousedown', (e) => {
+  if (volume.classList.contains('disabled')) return;
+  volDragging = true;
+  const v = volFromEvent(e);
+  paintVolume(v);
+});
+window.addEventListener('mousemove', (e) => {
+  if (!volDragging) return;
+  const v = volFromEvent(e);
+  paintVolume(v);
+  const now = Date.now();
+  if (now - volThrottle > 220) {
+    volThrottle = now;
+    ctl('volume', { percent: v });
+  }
+});
+window.addEventListener('mouseup', (e) => {
+  if (!volDragging) return;
+  volDragging = false;
+  const v = volFromEvent(e);
+  paintVolume(v);
+  if (v > 0) lastVolume = v;
+  sendVolume(v);
+});
+
+// Muto / riattiva
+$('volBtn').onclick = () => {
+  if (volume.classList.contains('disabled')) return;
+  const cur = parseInt($('volVal').textContent, 10) || 0;
+  const target = cur > 0 ? 0 : lastVolume > 0 ? lastVolume : 40;
+  if (cur > 0) lastVolume = cur;
+  paintVolume(target);
+  sendVolume(target);
+};
 
 /* ---------- Dispositivi ---------- */
 
