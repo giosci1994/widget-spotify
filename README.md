@@ -4,7 +4,7 @@
 Click the tray icon and a "now playing" card pops up with controls, a seek bar
 and a device switcher — without opening the Spotify app.
 
-**🇬🇧 English** · [🇮🇹 Italiano](#-italiano)
+**🇬🇧 English** · [🇮🇹 Italiano](#italiano)
 
 It talks to the **Spotify Web API**, so it controls the *active device* of your
 account: PC, phone or a smart speaker (e.g. Amazon Echo).
