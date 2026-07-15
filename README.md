@@ -18,7 +18,7 @@ account: PC, phone or a smart speaker (e.g. Amazon Echo).
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/widget.png" width="420" alt="The widget card in the corner of the screen" />
+  <img src="docs/demo.gif" width="430" alt="Widget Spotify demo — controlling playback from the Windows tray" />
 </p>
 
 ---
