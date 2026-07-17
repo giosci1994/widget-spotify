@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget Spotify | A tiny Spotify remote for Windows</title>
+    <meta name="description" content="A tiny Spotify remote that lives in the Windows system tray. Click the tray icon and a 'now playing' card pops up with controls, a seek bar and a device switcher.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <header class="navbar">
+        <div class="container nav-content">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.54.659.301 1.02zM19.32 14.1c-.3.42-.84.54-1.26.3-3.24-1.98-8.159-2.58-11.94-1.44-.48.18-1.02-.06-1.2-.54-.18-.48.06-1.02.54-1.2 4.32-1.32 9.72-.66 13.56 1.62.42.24.54.84.3 1.26zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.72 1.621.539.3.719 1.02.419 1.56-.299.54-1.02.72-1.56.42z"/></svg>
+                <span>Widget Spotify</span>
+            </div>
+            <a href="https://github.com/giosci1994/widget-spotify" target="_blank" class="github-link">
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero fade-in">
+            <div class="container hero-grid">
+                <div class="hero-text">
+                    <h1>A tiny Spotify remote for Windows tray.</h1>
+                    <p class="subtitle">Click the tray icon and a "now playing" card pops up with controls, a seek bar and a device switcher — without opening the Spotify app.</p>
+                    
+                    <div class="cta-group">
+                        <a href="https://github.com/giosci1994/widget-spotify/releases/latest" class="btn btn-primary">
+                            Download Latest Release
+                        </a>
+                        <a href="#guide" class="btn btn-secondary">
+                            View Setup Guide
+                        </a>
+                    </div>
+                    
+                    <div class="badges">
+                        <img src="https://img.shields.io/github/v/release/giosci1994/widget-spotify" alt="Release">
+                        <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Windows">
+                    </div>
+                </div>
+                
+                <div class="hero-visual">
+                    <div class="glass-container">
+                        <img src="demo.gif" alt="Widget Spotify Demo" class="demo-gif">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features fade-in scroll-element">
+            <div class="container">
+                <h2 class="section-title">Everything you need, <span>nothing you don't.</span></h2>
+                
+                <div class="feature-grid">
+                    <div class="feature-card glass-panel">
+                        <div class="icon-wrapper">🎧</div>
+                        <h3>Now Playing</h3>
+                        <p>Beautiful presentation of album art, title, artist, and album straight from your active device.</p>
+                    </div>
+                    
+                    <div class="feature-card glass-panel">
+                        <div class="icon-wrapper">⏯️</div>
+                        <h3>Playback Controls</h3>
+                        <p>Play, pause, skip, go back, shuffle, and repeat. Total control without opening the main app.</p>
+                    </div>
+                    
+                    <div class="feature-card glass-panel">
+                        <div class="icon-wrapper">🎚️</div>
+                        <h3>Smart Seek Bar</h3>
+                        <p>Clickable progress bar with smooth interpolation to easily skip to your favorite part of a song.</p>
+                    </div>
+                    
+                    <div class="feature-card glass-panel">
+                        <div class="icon-wrapper">🔊</div>
+                        <h3>Volume Control</h3>
+                        <p>Adjust the volume or mute your active device instantly using the integrated slider.</p>
+                    </div>
+                    
+                    <div class="feature-card glass-panel">
+                        <div class="icon-wrapper">🖥️</div>
+                        <h3>Device Switcher</h3>
+                        <p>Seamlessly move playback between your PC, phone, or smart speakers (like Amazon Echo).</p>
+                    </div>
+                    
+                    <div class="feature-card glass-panel">
+                        <div class="icon-wrapper">🔒</div>
+                        <h3>Secure & Native</h3>
+                        <p>Uses OAuth PKCE. Refresh token is encrypted with Windows DPAPI. Auto-hides natively.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="screenshots fade-in scroll-element">
+            <div class="container">
+                <h2 class="section-title text-center">A native feel.</h2>
+                <div class="screenshot-grid">
+                    <div class="screenshot-container glass-panel text-center">
+                        <img src="screenshots/tray-menu.png" alt="Tray menu" class="screenshot-img">
+                        <p class="caption">Right-click tray menu</p>
+                    </div>
+                    <div class="screenshot-container glass-panel text-center">
+                        <img src="screenshots/settings.png" alt="Settings window" class="screenshot-img">
+                        <p class="caption">Extensive settings</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="guide" class="guide fade-in scroll-element">
+            <div class="container">
+                <div class="glass-panel guide-box">
+                    <h2>⚠️ Before you start</h2>
+                    <ul class="requirements-list">
+                        <li>You need a <strong>Spotify Premium</strong> account.</li>
+                        <li>You must create your own free Spotify developer app to get a Client ID.</li>
+                    </ul>
+
+                    <h3>Quick Setup</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-num">1</div>
+                            <div class="step-content">
+                                <h4>Download and run</h4>
+                                <p>Get the installer from the <a href="https://github.com/giosci1994/widget-spotify/releases" target="_blank">Releases page</a>. A green icon will appear in your tray.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">2</div>
+                            <div class="step-content">
+                                <h4>Create a Spotify App</h4>
+                                <p>Go to the <a href="https://developer.spotify.com/dashboard" target="_blank">Spotify Developer Dashboard</a> and create a new app. Set the Redirect URI to exactly: <code>http://127.0.0.1:8888/callback</code> and check "Web API".</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">3</div>
+                            <div class="step-content">
+                                <h4>Connect the Widget</h4>
+                                <p>Copy your Client ID from the Spotify dashboard. Click the tray icon, paste the ID, and click "Log in with Spotify".</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-left">
+                <div class="logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.54.659.301 1.02zM19.32 14.1c-.3.42-.84.54-1.26.3-3.24-1.98-8.159-2.58-11.94-1.44-.48.18-1.02-.06-1.2-.54-.18-.48.06-1.02.54-1.2 4.32-1.32 9.72-.66 13.56 1.62.42.24.54.84.3 1.26zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.72 1.621.539.3.719 1.02.419 1.56-.299.54-1.02.72-1.56.42z"/></svg>
+                    <span>Widget Spotify</span>
+                </div>
+                <p>Created by giosci1994. Released under the MIT License.</p>
+                <p>Not affiliated with Spotify AB.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
