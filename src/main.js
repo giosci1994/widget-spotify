@@ -24,7 +24,7 @@ let lastAuthUrl = null;
 let updateReadyVersion = null;
 
 const WIN_WIDTH = 372;
-const WIN_HEIGHT = 216;
+const WIN_HEIGHT = 252;
 
 function publicConfig() {
   const cfg = auth.loadConfig();

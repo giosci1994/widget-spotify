@@ -12,8 +12,8 @@
   "author": "giosci1994",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^43.1.1",
-    "electron-builder": "^25.1.8"
+    "electron": "^43.1.0",
+    "electron-builder": "^26.15.3"
   },
   "build": {
     "appId": "com.giosci1994.widgetspotify",
