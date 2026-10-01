@@ -15,6 +15,7 @@ account: PC, phone or a smart speaker (e.g. Amazon Echo).
   <img src="https://img.shields.io/github/downloads/giosci1994/widget-spotify/total" alt="Downloads" />
   <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Windows" />
   <a href="LICENSE"><img src="https://img.shields.io/github/license/giosci1994/widget-spotify" alt="License" /></a>
+  <a href="https://buymeacoffee.com/giosci1994u"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee" /></a>
 </p>
 
 <p align="center">
@@ -151,6 +152,12 @@ scripts/
 - The widget only talks to `accounts.spotify.com` and `api.spotify.com`.
 - No data is sent to any third party.
 
+## ☕ Support
+
+If Widget Spotify is useful to you, you can buy me a coffee.
+
+<a href="https://buymeacoffee.com/giosci1994u"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="45" alt="Buy Me a Coffee" /></a>
+
 ## 📄 License
 
 [MIT](LICENSE) © giosci1994
@@ -256,6 +263,12 @@ git tag v0.2.1 && git push origin v0.2.1   # la Action builda e pubblica da sola
 - Il **refresh token** è salvato cifrato (DPAPI di Windows) in `%APPDATA%/widget-spotify/`.
 - Il widget parla **solo** con `accounts.spotify.com` e `api.spotify.com`.
 - Nessun dato viene inviato a terzi.
+
+## ☕ Supporta il progetto
+
+Se Widget Spotify ti è utile, puoi offrirmi un caffè.
+
+<a href="https://buymeacoffee.com/giosci1994u"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" height="45" alt="Buy Me a Coffee" /></a>
 
 ## 📄 Licenza
 
