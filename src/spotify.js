@@ -44,10 +44,7 @@ async function call(method, endpoint, { query, body } = {}, retry = true) {
 module.exports = {
   getPlaybackState: () => call('GET', '/me/player'),
   getDevices: () => call('GET', '/me/player/devices'),
-  play: (deviceId) =>
-    call('PUT', '/me/player/play', {
-      query: deviceId ? { device_id: deviceId } : undefined,
-    }),
+  play: () => call('PUT', '/me/player/play'),
   pause: () => call('PUT', '/me/player/pause'),
   next: () => call('POST', '/me/player/next'),
   previous: () => call('POST', '/me/player/previous'),

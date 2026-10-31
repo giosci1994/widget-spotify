@@ -9,6 +9,7 @@
   "scripts": {
     "start": "electron .",
     "make-icon": "node scripts/make-icon.js",
+    "make-social": "electron scripts/make-social.js",
     "dist": "npm run make-icon && electron-builder",
     "pack": "npm run make-icon && electron-builder --dir"
   },

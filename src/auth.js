@@ -6,11 +6,7 @@ const fs = require('fs');
 const http = require('http');
 const crypto = require('crypto');
 
-const SCOPES = [
-  'user-read-playback-state',
-  'user-modify-playback-state',
-  'user-read-currently-playing',
-].join(' ');
+const SCOPES = ['user-read-playback-state', 'user-modify-playback-state'].join(' ');
 
 const DEFAULT_PORT = 8888;
 

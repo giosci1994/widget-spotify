@@ -35,7 +35,7 @@ const webPreferences = {
 
 function publicConfig() {
   const cfg = auth.loadConfig();
-  return { hasClientId: !!cfg.clientId, redirectUri: cfg.redirectUri };
+  return { hasClientId: !!cfg.clientId };
 }
 
 function createWindow() {
@@ -136,10 +136,8 @@ function openSettings() {
     height: 548,
     resizable: false,
     frame: false,
-    transparent: false,
     backgroundColor: '#17171c',
     show: false,
-    skipTaskbar: false,
     fullscreenable: false,
     maximizable: false,
     title: 'Impostazioni · Widget Spotify',
@@ -283,10 +281,7 @@ function refreshTrayMenu() {
 }
 
 function buildTray() {
-  const icon = nativeImage.createFromPath(
-    path.join(__dirname, '..', 'assets', 'tray.png')
-  );
-  tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon);
+  tray = new Tray(nativeImage.createFromPath(path.join(__dirname, '..', 'assets', 'tray.png')));
   tray.setToolTip('Widget Spotify');
   refreshTrayMenu();
   tray.on('click', toggleWindow);

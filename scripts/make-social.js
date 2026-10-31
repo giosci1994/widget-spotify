@@ -1,6 +1,6 @@
 // Genera docs/social-preview.png (1280x640) per la "social preview" di GitHub.
 // Renderizza una card HTML in una finestra Electron nascosta e la cattura.
-// Uso: electron scripts/make-social.js
+// Uso: npm run make-social
 const { app, BrowserWindow } = require('electron');
 const fs = require('fs');
 const path = require('path');
@@ -65,7 +65,6 @@ app.whenReady().then(async () => {
 
   const win = new BrowserWindow({
     width: W, height: H, show: false, useContentSize: true,
-    webPreferences: { offscreen: false },
   });
   await win.loadFile(tmp);
   win.webContents.setZoomFactor(1);

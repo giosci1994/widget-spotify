@@ -1,6 +1,5 @@
 node_modules/
 dist/
-out/
 
 # Configurazione personale con il Client ID: NON pubblicare
 config.json

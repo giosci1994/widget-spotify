@@ -46,4 +46,4 @@ function save(patch) {
   return current;
 }
 
-module.exports = { DEFAULTS, load, save };
+module.exports = { load, save };
