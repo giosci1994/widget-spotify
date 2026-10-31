@@ -12,6 +12,8 @@ const SCOPES = [
   'user-read-currently-playing',
 ].join(' ');
 
+const DEFAULT_PORT = 8888;
+
 // Cache dell'access token in memoria
 let cache = { accessToken: null, expiresAt: 0 };
 
@@ -55,11 +57,11 @@ function userConfigPath() {
 // 2) config.json in userData (scritto dal campo in-app o a mano)
 // 3) variabile d'ambiente SPOTIFY_CLIENT_ID
 function loadConfig() {
-  const merged = { clientId: '', port: 8888 };
+  const merged = { clientId: '', port: DEFAULT_PORT };
   Object.assign(merged, readJson(path.join(projectRoot(), 'config.json')));
   Object.assign(merged, readJson(userConfigPath()));
   if (process.env.SPOTIFY_CLIENT_ID) merged.clientId = process.env.SPOTIFY_CLIENT_ID;
-  const port = merged.port || 8888;
+  const port = merged.port || DEFAULT_PORT;
   return {
     clientId: String(merged.clientId || '').trim(),
     port,

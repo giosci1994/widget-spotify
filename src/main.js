@@ -23,8 +23,15 @@ let fadeTimer = null;
 let lastAuthUrl = null;
 let updateReadyVersion = null;
 
+// Devono coincidere con le dimensioni di .card in renderer/style.css
 const WIN_WIDTH = 372;
 const WIN_HEIGHT = 252;
+
+const webPreferences = {
+  preload: path.join(__dirname, 'preload.js'),
+  contextIsolation: true,
+  nodeIntegration: false,
+};
 
 function publicConfig() {
   const cfg = auth.loadConfig();
@@ -45,11 +52,7 @@ function createWindow() {
     maximizable: false,
     minimizable: false,
     hasShadow: false,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
+    webPreferences,
   });
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
   win.webContents.on('did-finish-load', pushSettings);
@@ -140,11 +143,7 @@ function openSettings() {
     fullscreenable: false,
     maximizable: false,
     title: 'Impostazioni · Widget Spotify',
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
+    webPreferences,
   });
   settingsWin.loadFile(path.join(__dirname, 'settings', 'index.html'));
   settingsWin.once('ready-to-show', () => settingsWin.show());
@@ -184,11 +183,15 @@ function normalize(s) {
   };
 }
 
+function sendLoggedOut() {
+  win.webContents.send('auth-state', { authed: false, config: publicConfig() });
+}
+
 async function refreshNow() {
   if (!win || win.isDestroyed()) return;
   try {
     if (!auth.hasStoredAuth()) {
-      win.webContents.send('auth-state', { authed: false, config: publicConfig() });
+      sendLoggedOut();
       return;
     }
     const state = await spotify.getPlaybackState();
@@ -197,7 +200,7 @@ async function refreshNow() {
   } catch (e) {
     const msg = String(e && e.message);
     if (msg.includes('NO_AUTH')) {
-      win.webContents.send('auth-state', { authed: false, config: publicConfig() });
+      sendLoggedOut();
     } else {
       win.webContents.send('error', msg);
     }
@@ -217,6 +220,23 @@ function startPolling() {
 function stopPolling() {
   if (pollTimer) clearTimeout(pollTimer);
   pollTimer = null;
+}
+
+// URL di autorizzazione pronto: lo copia negli appunti e lo segnala alla card,
+// così l'utente può completare l'accesso in un altro browser.
+function onAuthUrl(url) {
+  lastAuthUrl = url;
+  try {
+    clipboard.writeText(url);
+  } catch (e) {
+    /* clipboard non disponibile */
+  }
+  if (win && !win.isDestroyed()) win.webContents.send('auth-url', url);
+}
+
+async function login() {
+  await auth.startAuthFlow(onAuthUrl);
+  startPolling();
 }
 
 function trayMenu() {
@@ -246,15 +266,7 @@ function trayMenu() {
     click: async () => {
       auth.clearAuth();
       try {
-        await auth.startAuthFlow((url) => {
-          lastAuthUrl = url;
-          try {
-            clipboard.writeText(url);
-          } catch (e) {
-            /* clipboard non disponibile */
-          }
-        });
-        startPolling();
+        await login();
       } catch (e) {
         console.error(e);
       }
@@ -312,16 +324,7 @@ ipcMain.handle('control', async (_e, action, payload = {}) => {
   try {
     switch (action) {
       case 'login':
-        await auth.startAuthFlow((url) => {
-          lastAuthUrl = url;
-          try {
-            clipboard.writeText(url);
-          } catch (e) {
-            /* clipboard non disponibile */
-          }
-          if (win && !win.isDestroyed()) win.webContents.send('auth-url', url);
-        });
-        startPolling();
+        await login();
         break;
       case 'copyAuthLink':
         if (lastAuthUrl) {
