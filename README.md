@@ -136,7 +136,8 @@ src/
   main.js        main process: tray, window, polling, IPC, auto-update
   auth.js        OAuth PKCE + token handling/refresh + multi-source config
   spotify.js     Web API wrapper (/me/player)
-  preload.js     secure bridge main <-> renderer
+  preload.js     secure bridge main <-> card
+  preload-settings.js  secure bridge main <-> settings window
   settings.js    persistent settings (corner, fade, opacity, ...)
   renderer/      the card UI (html/css/js)
   settings/      settings window

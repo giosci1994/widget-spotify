@@ -4,7 +4,7 @@ let s = {};
 
 function apply(patch) {
   s = { ...s, ...patch };
-  window.spotify.saveSettings(patch);
+  window.settingsApi.save(patch);
 }
 
 function render() {
@@ -23,7 +23,7 @@ function render() {
 }
 
 async function init() {
-  s = await window.spotify.getSettings();
+  s = await window.settingsApi.get();
   render();
 }
 
@@ -44,6 +44,6 @@ $('opacity').oninput = (e) => {
   apply({ opacity: pct / 100 });
 };
 
-$('close').onclick = () => window.spotify.closeSettings();
+$('close').onclick = () => window.settingsApi.close();
 
 init();

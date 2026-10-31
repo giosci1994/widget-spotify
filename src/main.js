@@ -19,6 +19,7 @@ let tray = null;
 let win = null;
 let settingsWin = null;
 let pollTimer = null;
+let pollGen = 0; // invalida i cicli di polling precedenti
 let fadeTimer = null;
 let lastAuthUrl = null;
 let updateReadyVersion = null;
@@ -27,11 +28,21 @@ let updateReadyVersion = null;
 const WIN_WIDTH = 372;
 const WIN_HEIGHT = 252;
 
-const webPreferences = {
-  preload: path.join(__dirname, 'preload.js'),
-  contextIsolation: true,
-  nodeIntegration: false,
-};
+// Il polling gira solo mentre la card è visibile
+const POLL_MS = 1000;
+
+// Ogni finestra ha il suo preload, che espone solo le API che le servono
+function webPreferences(preload) {
+  return {
+    preload: path.join(__dirname, preload),
+    contextIsolation: true,
+    nodeIntegration: false,
+  };
+}
+
+function alive(w) {
+  return !!w && !w.isDestroyed();
+}
 
 function publicConfig() {
   const cfg = auth.loadConfig();
@@ -52,7 +63,7 @@ function createWindow() {
     maximizable: false,
     minimizable: false,
     hasShadow: false,
-    webPreferences,
+    webPreferences: webPreferences('preload.js'),
   });
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
   win.webContents.on('did-finish-load', pushSettings);
@@ -79,6 +90,11 @@ function fadeTo(target, after) {
   const steps = 12;
   let i = 0;
   fadeTimer = setInterval(() => {
+    if (!alive(win)) {
+      clearInterval(fadeTimer);
+      fadeTimer = null;
+      return;
+    }
     i++;
     win.setOpacity(start + (target - start) * (i / steps));
     if (i >= steps) {
@@ -91,14 +107,15 @@ function fadeTo(target, after) {
 }
 
 function hideWindow() {
-  if (!win || !win.isVisible()) return;
+  if (!alive(win) || !win.isVisible()) return;
+  stopPolling();
   const s = settings.load();
-  if (s.fade) fadeTo(0, () => win && win.hide());
+  if (s.fade) fadeTo(0, () => alive(win) && win.hide());
   else win.hide();
 }
 
 function toggleWindow() {
-  if (!win) return;
+  if (!alive(win)) return;
   if (win.isVisible()) {
     hideWindow();
     return;
@@ -108,17 +125,17 @@ function toggleWindow() {
   win.setOpacity(s.fade ? 0 : s.opacity);
   win.show();
   win.focus();
-  refreshNow();
+  startPolling();
   pushSettings();
   if (s.fade) fadeTo(s.opacity);
 }
 
 function pushSettings() {
-  if (win && !win.isDestroyed()) win.webContents.send('settings', settings.load());
+  if (alive(win)) win.webContents.send('settings', settings.load());
 }
 
 function applySettings(s) {
-  if (win && win.isVisible()) {
+  if (alive(win) && win.isVisible()) {
     positionWindow();
     if (!fadeTimer) win.setOpacity(s.opacity);
   }
@@ -126,7 +143,7 @@ function applySettings(s) {
 }
 
 function openSettings() {
-  if (settingsWin && !settingsWin.isDestroyed()) {
+  if (alive(settingsWin)) {
     settingsWin.show();
     settingsWin.focus();
     return;
@@ -141,7 +158,7 @@ function openSettings() {
     fullscreenable: false,
     maximizable: false,
     title: 'Impostazioni · Widget Spotify',
-    webPreferences,
+    webPreferences: webPreferences('preload-settings.js'),
   });
   settingsWin.loadFile(path.join(__dirname, 'settings', 'index.html'));
   settingsWin.once('ready-to-show', () => settingsWin.show());
@@ -185,37 +202,41 @@ function sendLoggedOut() {
   win.webContents.send('auth-state', { authed: false, config: publicConfig() });
 }
 
+// Aggiorna la card. Ritorna i ms da attendere prima del prossimo poll
+// se Spotify ha risposto con un rate limit (429), altrimenti 0.
 async function refreshNow() {
-  if (!win || win.isDestroyed()) return;
+  if (!alive(win)) return 0;
   try {
     if (!auth.hasStoredAuth()) {
       sendLoggedOut();
-      return;
+      return 0;
     }
     const state = await spotify.getPlaybackState();
-    if (state && state.__rateLimited) return;
-    win.webContents.send('playback', normalize(state));
+    if (alive(win)) win.webContents.send('playback', normalize(state));
   } catch (e) {
+    if (e && e.status === 429) return e.retryAfterMs;
+    if (!alive(win)) return 0;
     const msg = String(e && e.message);
-    if (msg.includes('NO_AUTH')) {
-      sendLoggedOut();
-    } else {
-      win.webContents.send('error', msg);
-    }
+    if (msg.includes('NO_AUTH')) sendLoggedOut();
+    else win.webContents.send('error', msg);
   }
+  return 0;
 }
 
 function startPolling() {
   stopPolling();
+  const gen = pollGen;
   const tick = async () => {
-    await refreshNow();
-    const interval = win && win.isVisible() ? 1000 : 5000;
-    pollTimer = setTimeout(tick, interval);
+    const backoff = await refreshNow();
+    // fermato (o riavviato) mentre la richiesta era in corso
+    if (gen !== pollGen || !alive(win) || !win.isVisible()) return;
+    pollTimer = setTimeout(tick, Math.max(POLL_MS, backoff));
   };
-  tick();
+  pollTimer = setTimeout(tick, 0);
 }
 
 function stopPolling() {
+  pollGen++;
   if (pollTimer) clearTimeout(pollTimer);
   pollTimer = null;
 }
@@ -229,12 +250,12 @@ function onAuthUrl(url) {
   } catch (e) {
     /* clipboard non disponibile */
   }
-  if (win && !win.isDestroyed()) win.webContents.send('auth-url', url);
+  if (alive(win)) win.webContents.send('auth-url', url);
 }
 
 async function login() {
   await auth.startAuthFlow(onAuthUrl);
-  startPolling();
+  refreshNow();
 }
 
 function trayMenu() {
@@ -262,7 +283,7 @@ function trayMenu() {
   items.push({
     label: 'Accedi / Ri-autentica',
     click: async () => {
-      auth.clearAuth();
+      // Il vecchio token resta valido finché il nuovo login non va a buon fine
       try {
         await login();
       } catch (e) {
@@ -271,13 +292,15 @@ function trayMenu() {
     },
   });
   items.push({ type: 'separator' });
-  items.push({ label: 'Esci', click: () => app.exit(0) });
+  // app.quit() (non app.exit) emette gli eventi di chiusura: serve, tra l'altro,
+  // a electron-updater per installare un aggiornamento già scaricato.
+  items.push({ label: 'Esci', click: () => app.quit() });
 
   return Menu.buildFromTemplate(items);
 }
 
 function refreshTrayMenu() {
-  if (tray && !tray.isDestroyed()) tray.setContextMenu(trayMenu());
+  if (alive(tray)) tray.setContextMenu(trayMenu());
 }
 
 function buildTray() {
@@ -388,7 +411,7 @@ ipcMain.handle('save-settings', (_e, patch = {}) => {
   return { ...s, autostart: app.getLoginItemSettings().openAtLogin };
 });
 ipcMain.handle('close-settings', () => {
-  if (settingsWin && !settingsWin.isDestroyed()) settingsWin.close();
+  if (alive(settingsWin)) settingsWin.close();
 });
 
 const gotLock = app.requestSingleInstanceLock();
@@ -408,7 +431,6 @@ if (!gotLock) {
         /* mostrerà la schermata di login */
       }
     }
-    startPolling();
   });
 
   // App da tray: non uscire quando la finestra viene nascosta.

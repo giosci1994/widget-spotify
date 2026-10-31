@@ -13,11 +13,22 @@ const DEFAULT_PORT = 8888;
 // Cache dell'access token in memoria
 let cache = { accessToken: null, expiresAt: 0 };
 
+// Refresh token in memoria: undefined = non ancora letto dal disco.
+// Evita di leggere e decifrare il file a ogni poll.
+let refreshTokenCache;
+
+// Refresh dell'access token in corso: le chiamate concorrenti lo condividono
+let refreshing = null;
+
+// Se l'utente non completa il login entro questo tempo, la porta viene liberata
+const AUTH_TIMEOUT_MS = 5 * 60 * 1000;
+
 // Flusso di login attualmente in corso (per poterlo annullare a un nuovo tentativo)
-let activeAuth = null; // { server, reject }
+let activeAuth = null; // { server, reject, timer }
 
 function cancelActiveAuth() {
   if (!activeAuth) return;
+  clearTimeout(activeAuth.timer);
   try {
     activeAuth.server.close();
   } catch (e) {
@@ -91,9 +102,15 @@ function saveRefreshToken(refreshToken) {
     // Fallback (raro): salva in chiaro con prefisso riconoscibile
     fs.writeFileSync(file, Buffer.from('PLAIN:' + refreshToken, 'utf8'));
   }
+  refreshTokenCache = refreshToken;
 }
 
 function getStoredRefreshToken() {
+  if (refreshTokenCache === undefined) refreshTokenCache = readRefreshTokenFile();
+  return refreshTokenCache;
+}
+
+function readRefreshTokenFile() {
   const file = tokenFilePath();
   if (!fs.existsSync(file)) return null;
   const buf = fs.readFileSync(file);
@@ -113,6 +130,7 @@ function hasStoredAuth() {
 
 function clearAuth() {
   cache = { accessToken: null, expiresAt: 0 };
+  refreshTokenCache = null;
   try {
     fs.unlinkSync(tokenFilePath());
   } catch (e) {
@@ -136,7 +154,13 @@ async function tokenRequest(params) {
   });
   if (!res.ok) {
     const t = await res.text();
-    throw new Error(`Richiesta token fallita (${res.status}): ${t}`);
+    const e = new Error(`Richiesta token fallita (${res.status}): ${t}`);
+    try {
+      e.code = JSON.parse(t).error; // es. "invalid_grant"
+    } catch (_) {
+      /* risposta non JSON */
+    }
+    throw e;
   }
   return res.json();
 }
@@ -173,36 +197,45 @@ async function startAuthFlow(onUrl) {
   authUrl.searchParams.set('state', state);
 
   const code = await new Promise((resolve, reject) => {
+    const finish = (err, value) => {
+      clearTimeout(timer);
+      if (activeAuth && activeAuth.server === server) activeAuth = null;
+      server.close();
+      if (err) reject(err);
+      else resolve(value);
+    };
     const server = http.createServer((req, res) => {
       const u = new URL(req.url, cfg.redirectUri);
+      // Connection: close evita che il browser riusi questa connessione
+      // (keep-alive) per un login successivo, che finirebbe al server vecchio.
       if (u.pathname !== '/callback') {
-        res.writeHead(404);
+        res.writeHead(404, { Connection: 'close' });
         res.end();
         return;
       }
       const err = u.searchParams.get('error');
       const gotState = u.searchParams.get('state');
       const gotCode = u.searchParams.get('code');
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', Connection: 'close' });
       if (err || gotState !== state || !gotCode) {
         res.end(page('Autorizzazione non riuscita.', 'Puoi chiudere questa scheda e riprovare dal widget.'));
-        server.close();
-        reject(new Error('AUTH_FAILED: ' + (err || 'state non valido')));
+        finish(new Error('AUTH_FAILED: ' + (err || 'state non valido')));
         return;
       }
       res.end(page('Fatto! Widget Spotify autorizzato.', 'Puoi chiudere questa scheda.'));
-      server.close();
-      resolve(gotCode);
+      finish(null, gotCode);
     });
-    activeAuth = { server, reject };
-    server.on('error', reject);
+    const timer = setTimeout(() => finish(new Error('AUTH_TIMEOUT')), AUTH_TIMEOUT_MS);
+    activeAuth = { server, reject, timer };
+    server.on('error', (e) => {
+      finish(e.code === 'EADDRINUSE' ? new Error(`PORT_IN_USE: ${cfg.port}`) : e);
+    });
     server.listen(cfg.port, '127.0.0.1', () => {
       const url = authUrl.toString();
       if (typeof onUrl === 'function') onUrl(url);
       shell.openExternal(url);
     });
   });
-  activeAuth = null;
 
   const data = await tokenRequest({
     grant_type: 'authorization_code',
@@ -215,15 +248,34 @@ async function startAuthFlow(onUrl) {
   return cache.accessToken;
 }
 
-async function refreshAccessToken() {
+function refreshAccessToken() {
+  if (!refreshing) {
+    refreshing = doRefresh().finally(() => {
+      refreshing = null;
+    });
+  }
+  return refreshing;
+}
+
+async function doRefresh() {
   const cfg = loadConfig();
   const refreshToken = getStoredRefreshToken();
   if (!refreshToken) throw new Error('NO_AUTH');
-  const data = await tokenRequest({
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
-    client_id: cfg.clientId,
-  });
+  let data;
+  try {
+    data = await tokenRequest({
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+      client_id: cfg.clientId,
+    });
+  } catch (e) {
+    // Token revocato o scaduto: serve un nuovo login
+    if (e.code === 'invalid_grant') {
+      clearAuth();
+      throw new Error('NO_AUTH: accesso revocato');
+    }
+    throw e;
+  }
   applyTokenResponse(data);
   return cache.accessToken;
 }

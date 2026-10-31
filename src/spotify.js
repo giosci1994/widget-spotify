@@ -25,15 +25,14 @@ async function call(method, endpoint, { query, body } = {}, retry = true) {
   }
   // Nessun contenuto (es. nessun dispositivo attivo)
   if (res.status === 204) return null;
-  // Rate limit: segnala al chiamante
-  if (res.status === 429) {
-    const retryAfter = parseInt(res.headers.get('retry-after') || '1', 10);
-    return { __rateLimited: true, retryAfter };
-  }
   if (!res.ok) {
     const text = await res.text();
     const e = new Error(`Spotify ${res.status}: ${text}`);
     e.status = res.status;
+    // Rate limit: il chiamante deve aspettare "Retry-After" secondi
+    if (res.status === 429) {
+      e.retryAfterMs = (parseInt(res.headers.get('retry-after'), 10) || 1) * 1000;
+    }
     throw e;
   }
   const ct = res.headers.get('content-type') || '';

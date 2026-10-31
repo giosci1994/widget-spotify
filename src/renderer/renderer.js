@@ -51,6 +51,10 @@ async function ctl(action, payload) {
 
 function traduciErrore(err) {
   if (!err) return 'Errore';
+  if (err.includes('429')) return 'Troppe richieste a Spotify, riprova tra poco.';
+  if (err.includes('NO_AUTH')) return 'Accedi di nuovo a Spotify.';
+  if (err.includes('AUTH_TIMEOUT')) return 'Accesso scaduto: riprova.';
+  if (err.includes('PORT_IN_USE')) return 'Porta del login occupata da un altro programma.';
   if (err.includes('403')) return 'Serve Spotify Premium per i comandi.';
   if (err.includes('404') || err.includes('NO_ACTIVE')) return 'Nessun dispositivo attivo.';
   if (err.includes('NO_CLIENT_ID')) return 'Client ID mancante in config.json.';
@@ -280,25 +284,28 @@ const pop = $('devicePop');
 async function openDevices() {
   const r = await ctl('devices');
   const list = $('deviceList');
-  list.innerHTML = '';
   const devices = (r && r.data && r.data.devices) || [];
+  list.replaceChildren();
   if (!devices.length) {
-    list.innerHTML = '<div class="device-item">Nessun dispositivo trovato</div>';
+    list.append(el('div', 'device-item', 'Nessun dispositivo trovato'));
   }
   for (const d of devices) {
-    const el = document.createElement('div');
-    el.className = 'device-item' + (d.is_active ? ' current' : '');
-    el.innerHTML = `<span class="dname">${escapeHtml(d.name)}</span><span class="dtype">${d.type}</span>`;
-    el.onclick = async () => {
+    const item = el('div', 'device-item' + (d.is_active ? ' current' : ''));
+    item.append(el('span', 'dname', d.name), el('span', 'dtype', d.type));
+    item.onclick = async () => {
       pop.classList.add('hidden');
       await ctl('transfer', { deviceId: d.id, play: true });
     };
-    list.appendChild(el);
+    list.append(item);
   }
   pop.classList.remove('hidden');
 }
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// Crea un elemento con testo semplice (niente innerHTML con dati esterni)
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
 }
 $('deviceBtn').onclick = (e) => {
   e.stopPropagation();
