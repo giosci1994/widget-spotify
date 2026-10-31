@@ -171,6 +171,8 @@ The update is also installed automatically the next time you quit the app.
 The **portable version** can't update itself: download the new `.exe` from the Releases page
 when a new version comes out.
 
+What changed in each version is listed in the [changelog](CHANGELOG.md).
+
 ---
 
 ## 🩺 Troubleshooting
