@@ -11,13 +11,20 @@
     "make-icon": "node scripts/make-icon.js",
     "make-social": "electron scripts/make-social.js",
     "dist": "npm run make-icon && electron-builder",
-    "pack": "npm run make-icon && electron-builder --dir"
+    "pack": "npm run make-icon && electron-builder --dir",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.js\"",
+    "format:check": "prettier --check \"**/*.js\""
   },
   "author": "giosci1994",
   "license": "MIT",
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "electron": "^43.2.0",
-    "electron-builder": "^26.18.0"
+    "electron-builder": "^26.18.0",
+    "eslint": "^10.14.0",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10"
   },
   "build": {
     "appId": "com.giosci1994.widgetspotify",

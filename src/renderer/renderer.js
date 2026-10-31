@@ -6,14 +6,14 @@ const sections = {
   login: $('login'),
 };
 
-let state = null;          // ultimo stato di riproduzione
-let baseline = null;       // { progressMs, durationMs, isPlaying, at }
+let state = null; // ultimo stato di riproduzione
+let baseline = null; // { progressMs, durationMs, isPlaying, at }
 let seeking = false;
 let toastTimer = null;
 let uiSettings = { albumBackground: false };
 let volDragging = false;
-let volLockUntil = 0;   // ignora gli update in arrivo subito dopo una modifica
-let lastVolume = 40;    // per il ripristino dopo il muto
+let volLockUntil = 0; // ignora gli update in arrivo subito dopo una modifica
+let lastVolume = 40; // per il ripristino dopo il muto
 let volThrottle = 0;
 
 // Elementi aggiornati a ogni frame: meglio non cercarli ogni volta nel DOM

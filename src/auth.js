@@ -139,11 +139,7 @@ function clearAuth() {
 }
 
 function base64url(buf) {
-  return buf
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '');
+  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 async function tokenRequest(params) {
@@ -182,9 +178,7 @@ async function startAuthFlow(onUrl) {
   cancelActiveAuth(); // chiude un eventuale tentativo precedente rimasto in ascolto
 
   const verifier = base64url(crypto.randomBytes(64));
-  const challenge = base64url(
-    crypto.createHash('sha256').update(verifier).digest()
-  );
+  const challenge = base64url(crypto.createHash('sha256').update(verifier).digest());
   const state = base64url(crypto.randomBytes(16));
 
   const authUrl = new URL('https://accounts.spotify.com/authorize');
@@ -218,7 +212,12 @@ async function startAuthFlow(onUrl) {
       const gotCode = u.searchParams.get('code');
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', Connection: 'close' });
       if (err || gotState !== state || !gotCode) {
-        res.end(page('Autorizzazione non riuscita.', 'Puoi chiudere questa scheda e riprovare dal widget.'));
+        res.end(
+          page(
+            'Autorizzazione non riuscita.',
+            'Puoi chiudere questa scheda e riprovare dal widget.',
+          ),
+        );
         finish(new Error('AUTH_FAILED: ' + (err || 'state non valido')));
         return;
       }
@@ -272,7 +271,7 @@ async function doRefresh() {
     // Token revocato o scaduto: serve un nuovo login
     if (e.code === 'invalid_grant') {
       clearAuth();
-      throw new Error('NO_AUTH: accesso revocato');
+      throw new Error('NO_AUTH: accesso revocato', { cause: e });
     }
     throw e;
   }

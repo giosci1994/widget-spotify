@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const W = 1280, H = 640;
+const W = 1280,
+  H = 640;
 
 function dataUri(file) {
   const b = fs.readFileSync(file);
@@ -64,7 +65,10 @@ app.whenReady().then(async () => {
   fs.writeFileSync(tmp, html);
 
   const win = new BrowserWindow({
-    width: W, height: H, show: false, useContentSize: true,
+    width: W,
+    height: H,
+    show: false,
+    useContentSize: true,
   });
   await win.loadFile(tmp);
   win.webContents.setZoomFactor(1);

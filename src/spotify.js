@@ -53,10 +53,8 @@ module.exports = {
     call('PUT', '/me/player/volume', {
       query: { volume_percent: Math.max(0, Math.min(100, Math.round(percent))) },
     }),
-  setShuffle: (state) =>
-    call('PUT', '/me/player/shuffle', { query: { state: !!state } }),
-  setRepeat: (state) =>
-    call('PUT', '/me/player/repeat', { query: { state } }), // 'off' | 'context' | 'track'
+  setShuffle: (state) => call('PUT', '/me/player/shuffle', { query: { state: !!state } }),
+  setRepeat: (state) => call('PUT', '/me/player/repeat', { query: { state } }), // 'off' | 'context' | 'track'
   transfer: (deviceId, play) =>
     call('PUT', '/me/player', { body: { device_ids: [deviceId], play: !!play } }),
 };

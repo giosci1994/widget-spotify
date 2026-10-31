@@ -171,9 +171,7 @@ function normalize(s) {
   if (!s || !s.item) return { active: false };
   const item = s.item;
   const img =
-    item.album && item.album.images && item.album.images.length
-      ? item.album.images[0].url
-      : null;
+    item.album && item.album.images && item.album.images.length ? item.album.images[0].url : null;
   return {
     active: true,
     isPlaying: !!s.is_playing,

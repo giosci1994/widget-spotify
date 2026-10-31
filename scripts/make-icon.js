@@ -13,7 +13,7 @@ function crc32(buf) {
     c ^= buf[i];
     for (let k = 0; k < 8; k++) c = (c >>> 1) ^ (0xedb88320 & -(c & 1));
   }
-  return (~c) >>> 0;
+  return ~c >>> 0;
 }
 
 function chunk(type, data) {
@@ -38,24 +38,33 @@ function inTriangle(px, py, A, B, C) {
 
 // Ritorna il buffer PNG (RGBA) di dimensione N
 function makePng(N) {
-  const cx = N / 2, cy = N / 2, r = N / 2 - 0.5;
-  const A = [N * 0.40, N * 0.30], B = [N * 0.40, N * 0.70], C = [N * 0.70, N * 0.50];
+  const cx = N / 2,
+    cy = N / 2,
+    r = N / 2 - 0.5;
+  const A = [N * 0.4, N * 0.3],
+    B = [N * 0.4, N * 0.7],
+    C = [N * 0.7, N * 0.5];
 
   const raw = Buffer.alloc(N * (N * 4 + 1));
   let o = 0;
   for (let y = 0; y < N; y++) {
     raw[o++] = 0; // filtro "none"
     for (let x = 0; x < N; x++) {
-      const dx = x + 0.5 - cx, dy = y + 0.5 - cy;
+      const dx = x + 0.5 - cx,
+        dy = y + 0.5 - cy;
       const d = Math.sqrt(dx * dx + dy * dy);
       let a;
       if (d <= r - 0.5) a = 255;
       else if (d >= r + 0.5) a = 0;
       else a = Math.round(255 * (r + 0.5 - d));
 
-      let R = 29, G = 185, Bc = 84; // verde Spotify
+      let R = 29,
+        G = 185,
+        Bc = 84; // verde Spotify
       if (a > 0 && inTriangle(x + 0.5, y + 0.5, A, B, C)) {
-        R = 255; G = 255; Bc = 255; // triangolo play bianco
+        R = 255;
+        G = 255;
+        Bc = 255; // triangolo play bianco
       }
       raw[o++] = R;
       raw[o++] = G;
@@ -67,9 +76,11 @@ function makePng(N) {
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(N, 0);
   ihdr.writeUInt32BE(N, 4);
-  ihdr[8] = 8;  // bit depth
-  ihdr[9] = 6;  // color type RGBA
-  ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
+  ihdr[8] = 8; // bit depth
+  ihdr[9] = 6; // color type RGBA
+  ihdr[10] = 0;
+  ihdr[11] = 0;
+  ihdr[12] = 0;
 
   return Buffer.concat([
     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
@@ -89,12 +100,12 @@ function pngToIco(png, size) {
   const entry = Buffer.alloc(16);
   entry[0] = size >= 256 ? 0 : size; // 0 significa 256
   entry[1] = size >= 256 ? 0 : size;
-  entry[2] = 0;  // color palette
-  entry[3] = 0;  // reserved
-  entry.writeUInt16LE(1, 4);   // color planes
-  entry.writeUInt16LE(32, 6);  // bit per pixel
-  entry.writeUInt32LE(png.length, 8);  // dimensione dati
-  entry.writeUInt32LE(6 + 16, 12);     // offset dati
+  entry[2] = 0; // color palette
+  entry[3] = 0; // reserved
+  entry.writeUInt16LE(1, 4); // color planes
+  entry.writeUInt16LE(32, 6); // bit per pixel
+  entry.writeUInt32LE(png.length, 8); // dimensione dati
+  entry.writeUInt32LE(6 + 16, 12); // offset dati
 
   return Buffer.concat([header, entry, png]);
 }
