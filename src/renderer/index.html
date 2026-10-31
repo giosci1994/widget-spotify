@@ -7,6 +7,7 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; base-uri 'none'; form-action 'none';"
     />
+    <link rel="stylesheet" href="../shared/theme.css" />
     <link rel="stylesheet" href="style.css" />
     <title>Widget Spotify</title>
   </head>
@@ -31,9 +32,9 @@
           </button>
         </div>
 
-        <div class="progress" id="progress">
+        <div class="progress">
           <span class="time" id="cur">0:00</span>
-          <div class="bar" id="bar"><div class="bar-bg"><div class="bar-fill" id="fill"></div><div class="bar-knob" id="knob"></div></div></div>
+          <div class="track" id="bar"><div class="track-bg"><div class="track-fill" id="fill"></div><div class="track-knob" id="knob"></div></div></div>
           <span class="time" id="dur">0:00</span>
         </div>
 
@@ -63,7 +64,7 @@
             <svg id="volLow" class="hidden" viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z"/></svg>
             <svg id="volMute" class="hidden" viewBox="0 0 24 24" width="17" height="17"><path fill="currentColor" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
           </button>
-          <div class="vol-bar" id="volBar"><div class="vol-bg"><div class="vol-fill" id="volFill"></div><div class="vol-knob" id="volKnob"></div></div></div>
+          <div class="track" id="volBar"><div class="track-bg"><div class="track-fill" id="volFill"></div><div class="track-knob" id="volKnob"></div></div></div>
           <span class="vol-val" id="volVal">—</span>
         </div>
       </section>

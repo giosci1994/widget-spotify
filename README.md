@@ -124,7 +124,7 @@ Releases are automated: push a tag and the [GitHub Action](.github/workflows/rel
 builds on Windows and publishes the release with the exe files attached.
 
 ```bash
-git tag v0.2.1 && git push origin v0.2.1
+git tag v0.3.0 && git push origin v0.3.0
 ```
 
 ---
@@ -136,11 +136,16 @@ src/
   main.js        main process: tray, window, polling, IPC, auto-update
   auth.js        OAuth PKCE + token handling/refresh + multi-source config
   spotify.js     Web API wrapper (/me/player)
-  preload.js     secure bridge main <-> renderer
+  preload.js     secure bridge main <-> card
+  preload-settings.js  secure bridge main <-> settings window
+  settings.js    persistent settings (corner, fade, opacity, ...)
   renderer/      the card UI (html/css/js)
   settings/      settings window
+  shared/        CSS shared by the card and the settings window
 scripts/
   make-icon.js   generates the icons (tray.png, icon.png, icon.ico)
+  make-social.js generates docs/social-preview.png (npm run make-social)
+docs/            GitHub Pages landing page, screenshots, demo GIF
 ```
 
 ---
@@ -255,7 +260,7 @@ nella root del progetto: `{ "clientId": "IL_TUO_CLIENT_ID", "port": 8888 }`
 
 ```bash
 npm run dist     # installer NSIS + portable in dist/
-git tag v0.2.1 && git push origin v0.2.1   # la Action builda e pubblica da sola
+git tag v0.3.0 && git push origin v0.3.0   # la Action builda e pubblica da sola
 ```
 
 ## 🔐 Privacy

@@ -25,15 +25,14 @@ async function call(method, endpoint, { query, body } = {}, retry = true) {
   }
   // Nessun contenuto (es. nessun dispositivo attivo)
   if (res.status === 204) return null;
-  // Rate limit: segnala al chiamante
-  if (res.status === 429) {
-    const retryAfter = parseInt(res.headers.get('retry-after') || '1', 10);
-    return { __rateLimited: true, retryAfter };
-  }
   if (!res.ok) {
     const text = await res.text();
     const e = new Error(`Spotify ${res.status}: ${text}`);
     e.status = res.status;
+    // Rate limit: il chiamante deve aspettare "Retry-After" secondi
+    if (res.status === 429) {
+      e.retryAfterMs = (parseInt(res.headers.get('retry-after'), 10) || 1) * 1000;
+    }
     throw e;
   }
   const ct = res.headers.get('content-type') || '';
@@ -44,10 +43,7 @@ async function call(method, endpoint, { query, body } = {}, retry = true) {
 module.exports = {
   getPlaybackState: () => call('GET', '/me/player'),
   getDevices: () => call('GET', '/me/player/devices'),
-  play: (deviceId) =>
-    call('PUT', '/me/player/play', {
-      query: deviceId ? { device_id: deviceId } : undefined,
-    }),
+  play: () => call('PUT', '/me/player/play'),
   pause: () => call('PUT', '/me/player/pause'),
   next: () => call('POST', '/me/player/next'),
   previous: () => call('POST', '/me/player/previous'),
@@ -57,10 +53,8 @@ module.exports = {
     call('PUT', '/me/player/volume', {
       query: { volume_percent: Math.max(0, Math.min(100, Math.round(percent))) },
     }),
-  setShuffle: (state) =>
-    call('PUT', '/me/player/shuffle', { query: { state: !!state } }),
-  setRepeat: (state) =>
-    call('PUT', '/me/player/repeat', { query: { state } }), // 'off' | 'context' | 'track'
+  setShuffle: (state) => call('PUT', '/me/player/shuffle', { query: { state: !!state } }),
+  setRepeat: (state) => call('PUT', '/me/player/repeat', { query: { state } }), // 'off' | 'context' | 'track'
   transfer: (deviceId, play) =>
     call('PUT', '/me/player', { body: { device_ids: [deviceId], play: !!play } }),
 };

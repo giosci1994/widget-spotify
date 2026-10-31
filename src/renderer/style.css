@@ -1,25 +1,10 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --bg: #1c1c22;
-  --bg2: #26262e;
-  --green: #1db954;
-  --text: #ffffff;
-  --muted: #a7a7b0;
-  --muted2: #7c7c86;
-}
-
-html, body {
-  background: transparent;
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
-  color: var(--text);
-  user-select: none;
-  overflow: hidden;
-}
+/* Reset, variabili e font sono in ../shared/theme.css */
+html, body { background: transparent; }
 
 .hidden { display: none !important; }
 
 .card {
+  /* dimensioni = WIN_WIDTH x WIN_HEIGHT in main.js */
   position: relative;
   width: 372px;
   height: 252px;
@@ -57,8 +42,7 @@ html, body {
 .card.has-bg .time { color: #d2d2d8; }
 .card.has-bg .controls { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6)); }
 .card.has-bg .ctl.small { color: #d8d8dd; }
-.card.has-bg .bar-bg,
-.card.has-bg .vol-bg { background: rgba(255, 255, 255, 0.3); }
+.card.has-bg .track-bg { background: rgba(255, 255, 255, 0.3); }
 .card.has-bg .cover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6); }
 .card.has-bg .vol-btn { color: #d8d8dd; }
 .card.has-bg .vol-val { color: #d2d2d8; }
@@ -101,23 +85,25 @@ html, body {
 .progress { display: flex; align-items: center; gap: 9px; margin: 16px 2px 4px; }
 .time { font-size: 11px; color: var(--muted2); min-width: 30px; }
 .time:last-child { text-align: right; }
-.bar { flex: 1 1 auto; height: 16px; display: flex; align-items: center; cursor: pointer; }
-.bar-bg {
+
+/* Traccia orizzontale cliccabile: usata da barra di avanzamento e volume */
+.track { flex: 1 1 auto; height: 16px; display: flex; align-items: center; cursor: pointer; }
+.track-bg {
   position: relative; width: 100%; height: 4px;
   background: rgba(255, 255, 255, 0.16); border-radius: 3px;
 }
-.bar-fill {
+.track-fill {
   position: absolute; left: 0; top: 0; height: 100%;
   width: 0%; background: #d0d0d4; border-radius: 3px;
 }
-.bar-knob {
+.track-knob {
   position: absolute; top: 50%; left: 0%;
   width: 11px; height: 11px; border-radius: 50%;
   background: #fff; transform: translate(-50%, -50%);
   opacity: 0; transition: opacity .12s;
 }
-.bar:hover .bar-fill { background: var(--green); }
-.bar:hover .bar-knob { opacity: 1; }
+.track:hover .track-fill { background: var(--green); }
+.track:hover .track-knob { opacity: 1; }
 
 /* ---- Controls ---- */
 .controls { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 8px; }
@@ -138,7 +124,7 @@ html, body {
   width: 50px; height: 50px;
   box-shadow: 0 6px 16px rgba(29, 185, 84, 0.35);
 }
-.ctl.play:hover { background: #1ed760; color: #05130a; transform: scale(1.04); }
+.ctl.play:hover { background: var(--green-hover); color: #05130a; transform: scale(1.04); }
 .ctl.play:active { transform: scale(.96); }
 .repeat-one {
   position: absolute; right: 5px; bottom: 3px;
@@ -154,17 +140,6 @@ html, body {
   cursor: pointer; border-radius: 6px; transition: color .12s, background .12s;
 }
 .vol-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
-.vol-bar { flex: 1 1 auto; height: 16px; display: flex; align-items: center; cursor: pointer; }
-.vol-bg { position: relative; width: 100%; height: 4px; background: rgba(255, 255, 255, 0.16); border-radius: 3px; }
-.vol-fill { position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: #d0d0d4; border-radius: 3px; }
-.vol-knob {
-  position: absolute; top: 50%; left: 0%;
-  width: 11px; height: 11px; border-radius: 50%;
-  background: #fff; transform: translate(-50%, -50%);
-  opacity: 0; transition: opacity .12s;
-}
-.vol-bar:hover .vol-fill { background: var(--green); }
-.vol-bar:hover .vol-knob { opacity: 1; }
 .vol-val { font-size: 11px; color: var(--muted2); width: 34px; text-align: right; }
 .volume.disabled { opacity: 0.38; pointer-events: none; }
 
@@ -186,7 +161,7 @@ html, body {
 }
 .pill:hover { background: rgba(255,255,255,.12); }
 .pill.green { background: var(--green); border-color: var(--green); color: #05130a; }
-.pill.green:hover { background: #1ed760; }
+.pill.green:hover { background: var(--green-hover); }
 .pill.compact { margin-top: 0; padding: 8px 14px; }
 .login-block { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .cid-row { display: flex; gap: 8px; width: 300px; }

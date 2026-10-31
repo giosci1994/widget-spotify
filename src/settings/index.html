@@ -4,17 +4,12 @@
     <meta charset="utf-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none';"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none';"
     />
     <title>Impostazioni · Widget Spotify</title>
+    <link rel="stylesheet" href="../shared/theme.css" />
     <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      :root { --green: #1db954; --muted: #a7a7b0; --line: rgba(255,255,255,.08); }
-      html, body {
-        background: #17171c; color: #fff;
-        font-family: "Segoe UI", system-ui, sans-serif;
-        user-select: none; height: 100vh; overflow: hidden;
-      }
+      html, body { background: #17171c; height: 100vh; }
       header {
         display: flex; align-items: center; justify-content: space-between;
         padding: 14px 16px; -webkit-app-region: drag;
@@ -100,7 +95,7 @@
           <div class="label">Angolo di comparsa</div>
           <div class="desc">Dove appare il widget sullo schermo.</div>
         </div>
-        <div class="corners" id="corners">
+        <div class="corners">
           <button class="corner" data-corner="top-left"><span class="dot"></span></button>
           <button class="corner" data-corner="top-right"><span class="dot"></span></button>
           <button class="corner" data-corner="bottom-left"><span class="dot"></span></button>

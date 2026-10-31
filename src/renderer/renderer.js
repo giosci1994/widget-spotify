@@ -6,15 +6,20 @@ const sections = {
   login: $('login'),
 };
 
-let state = null;          // ultimo stato di riproduzione
-let baseline = null;       // { progressMs, durationMs, isPlaying, at }
+let state = null; // ultimo stato di riproduzione
+let baseline = null; // { progressMs, durationMs, isPlaying, at }
 let seeking = false;
 let toastTimer = null;
 let uiSettings = { albumBackground: false };
 let volDragging = false;
-let volLockUntil = 0;   // ignora gli update in arrivo subito dopo una modifica
-let lastVolume = 40;    // per il ripristino dopo il muto
+let volLockUntil = 0; // ignora gli update in arrivo subito dopo una modifica
+let lastVolume = 40; // per il ripristino dopo il muto
 let volThrottle = 0;
+
+// Elementi aggiornati a ogni frame: meglio non cercarli ogni volta nel DOM
+const fillEl = $('fill');
+const knobEl = $('knob');
+const curEl = $('cur');
 
 function show(name) {
   for (const k in sections) sections[k].classList.toggle('hidden', k !== name);
@@ -46,6 +51,10 @@ async function ctl(action, payload) {
 
 function traduciErrore(err) {
   if (!err) return 'Errore';
+  if (err.includes('429')) return 'Troppe richieste a Spotify, riprova tra poco.';
+  if (err.includes('NO_AUTH')) return 'Accedi di nuovo a Spotify.';
+  if (err.includes('AUTH_TIMEOUT')) return 'Accesso scaduto: riprova.';
+  if (err.includes('PORT_IN_USE')) return 'Porta del login occupata da un altro programma.';
   if (err.includes('403')) return 'Serve Spotify Premium per i comandi.';
   if (err.includes('404') || err.includes('NO_ACTIVE')) return 'Nessun dispositivo attivo.';
   if (err.includes('NO_CLIENT_ID')) return 'Client ID mancante in config.json.';
@@ -81,17 +90,9 @@ function renderPlayback(s) {
     updateBackground();
   }
 
-  // play/pausa
-  $('playIcon').classList.toggle('hidden', s.isPlaying);
-  $('pauseIcon').classList.toggle('hidden', !s.isPlaying);
-
-  // shuffle
-  $('shuffle').classList.toggle('on', s.shuffle);
-
-  // repeat
-  const rep = $('repeat');
-  rep.classList.toggle('on', s.repeat !== 'off');
-  $('repeatOne').classList.toggle('hidden', s.repeat !== 'track');
+  paintPlayIcon(s.isPlaying);
+  paintShuffle(s.shuffle);
+  paintRepeat(s.repeat);
 
   // dispositivo
   $('deviceBtn').classList.toggle('active', !!s.device);
@@ -102,17 +103,44 @@ function renderPlayback(s) {
   renderVolume(vol);
 }
 
+function paintPlayIcon(isPlaying) {
+  $('playIcon').classList.toggle('hidden', isPlaying);
+  $('pauseIcon').classList.toggle('hidden', !isPlaying);
+}
+
+function paintShuffle(on) {
+  $('shuffle').classList.toggle('on', on);
+}
+
+function paintRepeat(mode) {
+  $('repeat').classList.toggle('on', mode !== 'off');
+  $('repeatOne').classList.toggle('hidden', mode !== 'track');
+}
+
+function paintProgress(posMs, durationMs) {
+  const pct = durationMs ? (posMs / durationMs) * 100 : 0;
+  fillEl.style.width = pct + '%';
+  knobEl.style.left = pct + '%';
+  curEl.textContent = fmt(posMs);
+}
+
+// Posizione stimata: ultima posizione nota + tempo trascorso (se in riproduzione)
+function currentPos() {
+  if (!baseline) return 0;
+  let pos = baseline.progressMs;
+  if (baseline.isPlaying) pos += Date.now() - baseline.at;
+  return Math.min(pos, baseline.durationMs);
+}
+
+// Rapporto 0–1 della posizione del mouse lungo un elemento orizzontale
+function ratioFromEvent(e, el) {
+  const rect = el.getBoundingClientRect();
+  return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+}
+
 // Interpolazione locale della barra tra un poll e l'altro
 function animate() {
-  if (state && baseline && !seeking) {
-    let pos = baseline.progressMs;
-    if (baseline.isPlaying) pos += Date.now() - baseline.at;
-    if (pos > baseline.durationMs) pos = baseline.durationMs;
-    const pct = baseline.durationMs ? (pos / baseline.durationMs) * 100 : 0;
-    $('fill').style.width = pct + '%';
-    $('knob').style.left = pct + '%';
-    $('cur').textContent = fmt(pos);
-  }
+  if (state && baseline && !seeking) paintProgress(currentPos(), baseline.durationMs);
   requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);
@@ -126,8 +154,7 @@ $('playPause').onclick = () => {
   baseline.isPlaying = !wasPlaying;
   baseline.progressMs = currentPos();
   baseline.at = Date.now();
-  $('playIcon').classList.toggle('hidden', state.isPlaying);
-  $('pauseIcon').classList.toggle('hidden', !state.isPlaying);
+  paintPlayIcon(state.isPlaying);
   ctl('playPause', { isPlaying: wasPlaying });
 };
 
@@ -137,7 +164,7 @@ $('prev').onclick = () => ctl('previous');
 $('shuffle').onclick = () => {
   if (!state) return;
   state.shuffle = !state.shuffle;
-  $('shuffle').classList.toggle('on', state.shuffle);
+  paintShuffle(state.shuffle);
   ctl('shuffle', { state: state.shuffle });
 };
 
@@ -146,29 +173,16 @@ $('repeat').onclick = () => {
   const order = ['off', 'context', 'track'];
   const nextRep = order[(order.indexOf(state.repeat) + 1) % 3];
   state.repeat = nextRep;
-  $('repeat').classList.toggle('on', nextRep !== 'off');
-  $('repeatOne').classList.toggle('hidden', nextRep !== 'track');
+  paintRepeat(nextRep);
   ctl('repeat', { state: nextRep });
 };
-
-function currentPos() {
-  if (!baseline) return 0;
-  let pos = baseline.progressMs;
-  if (baseline.isPlaying) pos += Date.now() - baseline.at;
-  return Math.min(pos, baseline.durationMs);
-}
 
 // Seek cliccando sulla barra
 const bar = $('bar');
 function seekFromEvent(e) {
   if (!state) return;
-  const rect = bar.getBoundingClientRect();
-  let ratio = (e.clientX - rect.left) / rect.width;
-  ratio = Math.max(0, Math.min(1, ratio));
-  const posMs = ratio * state.durationMs;
-  $('fill').style.width = ratio * 100 + '%';
-  $('knob').style.left = ratio * 100 + '%';
-  $('cur').textContent = fmt(posMs);
+  const posMs = ratioFromEvent(e, bar) * state.durationMs;
+  paintProgress(posMs, state.durationMs);
   return posMs;
 }
 bar.addEventListener('mousedown', (e) => {
@@ -221,10 +235,7 @@ function renderVolume(v) {
 }
 
 function volFromEvent(e) {
-  const rect = volBar.getBoundingClientRect();
-  let ratio = (e.clientX - rect.left) / rect.width;
-  ratio = Math.max(0, Math.min(1, ratio));
-  return Math.round(ratio * 100);
+  return Math.round(ratioFromEvent(e, volBar) * 100);
 }
 
 function sendVolume(v) {
@@ -273,25 +284,28 @@ const pop = $('devicePop');
 async function openDevices() {
   const r = await ctl('devices');
   const list = $('deviceList');
-  list.innerHTML = '';
   const devices = (r && r.data && r.data.devices) || [];
+  list.replaceChildren();
   if (!devices.length) {
-    list.innerHTML = '<div class="device-item">Nessun dispositivo trovato</div>';
+    list.append(el('div', 'device-item', 'Nessun dispositivo trovato'));
   }
   for (const d of devices) {
-    const el = document.createElement('div');
-    el.className = 'device-item' + (d.is_active ? ' current' : '');
-    el.innerHTML = `<span class="dname">${escapeHtml(d.name)}</span><span class="dtype">${d.type}</span>`;
-    el.onclick = async () => {
+    const item = el('div', 'device-item' + (d.is_active ? ' current' : ''));
+    item.append(el('span', 'dname', d.name), el('span', 'dtype', d.type));
+    item.onclick = async () => {
       pop.classList.add('hidden');
       await ctl('transfer', { deviceId: d.id, play: true });
     };
-    list.appendChild(el);
+    list.append(item);
   }
   pop.classList.remove('hidden');
 }
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// Crea un elemento con testo semplice (niente innerHTML con dati esterni)
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  node.className = className;
+  if (text != null) node.textContent = text;
+  return node;
 }
 $('deviceBtn').onclick = (e) => {
   e.stopPropagation();

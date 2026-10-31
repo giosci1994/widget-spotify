@@ -1,32 +1,22 @@
+// Fade-in delle sezioni quando entrano nel viewport.
+// Una sezione visibile attiva anche quelle sopra, saltate con uno scroll veloce
+// o con un link interno (es. "#guide").
 document.addEventListener('DOMContentLoaded', () => {
-    // Fade-in animation on scroll using IntersectionObserver
-    const scrollElements = document.querySelectorAll('.scroll-element');
+  const elements = [...document.querySelectorAll('.scroll-element')];
 
-    const elementInView = (el, dividend = 1) => {
-        const elementTop = el.getBoundingClientRect().top;
-        return (
-            elementTop <=
-            (window.innerHeight || document.documentElement.clientHeight) / dividend
-        );
-    };
-
-    const displayScrollElement = (element) => {
-        element.classList.add('scrolled');
-    };
-
-    const handleScrollAnimation = () => {
-        scrollElements.forEach((el) => {
-            if (elementInView(el, 1.15)) {
-                displayScrollElement(el);
-            }
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const last = elements.indexOf(entry.target);
+        elements.slice(0, last + 1).forEach((el) => {
+          el.classList.add('scrolled');
+          observer.unobserve(el);
         });
-    }
+      });
+    },
+    { rootMargin: '0px 0px -13% 0px' },
+  );
 
-    // Trigger once on load
-    handleScrollAnimation();
-
-    // Trigger on scroll
-    window.addEventListener('scroll', () => {
-        handleScrollAnimation();
-    });
+  elements.forEach((el) => observer.observe(el));
 });

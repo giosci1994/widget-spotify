@@ -1,0 +1,18 @@
+/* Base comune alla card (renderer/) e alla finestra Impostazioni (settings/) */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #1db954;
+  --green-hover: #1ed760;
+  --text: #ffffff;
+  --muted: #a7a7b0;
+  --muted2: #7c7c86;
+  --line: rgba(255, 255, 255, 0.08);
+}
+
+html, body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  user-select: none;
+  overflow: hidden;
+}
