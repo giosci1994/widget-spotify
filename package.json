@@ -1,6 +1,6 @@
 {
   "name": "widget-spotify",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Mini-telecomando Spotify richiamabile dalla barra delle applicazioni di Windows",
   "main": "src/main.js",
   "engines": {
