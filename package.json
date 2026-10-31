@@ -1,8 +1,11 @@
 {
   "name": "widget-spotify",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Mini-telecomando Spotify richiamabile dalla barra delle applicazioni di Windows",
   "main": "src/main.js",
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
     "start": "electron .",
     "make-icon": "node scripts/make-icon.js",
@@ -13,7 +16,7 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^43.2.0",
-    "electron-builder": "^26.15.3"
+    "electron-builder": "^26.18.0"
   },
   "build": {
     "appId": "com.giosci1994.widgetspotify",
@@ -52,6 +55,6 @@
     }
   },
   "dependencies": {
-    "electron-updater": "^6.8.9"
+    "electron-updater": "^6.8.11"
   }
 }
