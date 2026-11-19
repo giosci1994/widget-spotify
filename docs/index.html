@@ -1,176 +1,260 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+  data-en-title="Widget Spotify — A tiny Spotify remote in the Windows tray"
+  data-it-title="Widget Spotify — Un piccolo telecomando Spotify nella tray di Windows">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Widget Spotify | A tiny Spotify remote for Windows</title>
-    <meta name="description" content="A tiny Spotify remote that lives in the Windows system tray. Click the tray icon and a 'now playing' card pops up with controls, a seek bar and a device switcher.">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#070b0a" />
+  <meta name="description"
+    content="A tiny Spotify remote that lives in the Windows system tray: now playing, controls, seek bar, volume and device switcher, without opening the Spotify app."
+    data-en="A tiny Spotify remote that lives in the Windows system tray: now playing, controls, seek bar, volume and device switcher, without opening the Spotify app."
+    data-it="Un piccolo telecomando Spotify nella tray di Windows: brano in riproduzione, comandi, barra di avanzamento, volume e cambio dispositivo, senza aprire l'app di Spotify." />
+  <title>Widget Spotify — A tiny Spotify remote in the Windows tray</title>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Widget Spotify — A tiny Spotify remote in the Windows tray" />
+  <meta property="og:description"
+    content="Click the tray icon: now playing, controls, seek bar, volume and device switcher. Windows 10 and 11, Spotify Premium." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://giosci1994.github.io/widget-spotify/" />
+  <meta property="og:image" content="https://giosci1994.github.io/widget-spotify/social-preview.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B5%3C/text%3E%3C/svg%3E" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css" />
+  <script src="./js/main.js" defer></script>
 </head>
+
 <body>
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
+  <div class="bg">
+    <div class="bg-grid"></div>
+  </div>
 
-    <header class="navbar">
-        <div class="container nav-content">
-            <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.54.659.301 1.02zM19.32 14.1c-.3.42-.84.54-1.26.3-3.24-1.98-8.159-2.58-11.94-1.44-.48.18-1.02-.06-1.2-.54-.18-.48.06-1.02.54-1.2 4.32-1.32 9.72-.66 13.56 1.62.42.24.54.84.3 1.26zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.72 1.621.539.3.719 1.02.419 1.56-.299.54-1.02.72-1.56.42z"/></svg>
-                <span>Widget Spotify</span>
-            </div>
-            <a href="https://github.com/giosci1994/widget-spotify" target="_blank" class="github-link">
-                GitHub
-            </a>
+  <header class="nav">
+    <div class="container nav-inner">
+      <div class="brand">
+        <a class="brand-main" href="#top" aria-label="Widget Spotify">
+          <span class="brand-mark" aria-hidden="true">🎵</span>
+          <span>Widget Spotify</span>
+        </a>
+      </div>
+
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#features" data-en="Features" data-it="Funzioni">Features</a>
+        <a href="#screenshots" data-en="Screenshots" data-it="Schermate">Screenshots</a>
+        <a href="#setup" data-en="Setup" data-it="Configurazione">Setup</a>
+        <a href="#download" data-en="Download" data-it="Scarica">Download</a>
+      </nav>
+
+      <div class="nav-cta">
+        <button id="lang-toggle" class="btn ghost small lang-btn" type="button" aria-label="Passa all'italiano">IT</button>
+        <a class="btn primary small" href="https://github.com/giosci1994/widget-spotify" target="_blank"
+          rel="noreferrer">GitHub</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top" class="container">
+    <section class="hero">
+      <div class="hero-left">
+        <div class="kicker">
+          <span class="dot"></span>
+          <span data-en="Windows 10 / 11 · Open source · MIT" data-it="Windows 10 / 11 · Open source · MIT">Windows 10 / 11 · Open source · MIT</span>
         </div>
-    </header>
 
-    <main>
-        <section class="hero">
-            <div class="container hero-grid">
-                <div class="hero-text">
-                    <h1>A tiny Spotify remote for Windows tray.</h1>
-                    <p class="subtitle">Click the tray icon and a "now playing" card pops up with controls, a seek bar and a device switcher — without opening the Spotify app.</p>
-                    
-                    <div class="cta-group">
-                        <a href="https://github.com/giosci1994/widget-spotify/releases/latest" class="btn btn-primary">
-                            Download Latest Release
-                        </a>
-                        <a href="#guide" class="btn btn-secondary">
-                            View Setup Guide
-                        </a>
-                    </div>
-                    
-                    <div class="badges">
-                        <img src="https://img.shields.io/github/v/release/giosci1994/widget-spotify" alt="Release">
-                        <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Windows">
-                    </div>
-                </div>
-                
-                <div class="hero-visual">
-                    <div class="glass-container">
-                        <img src="demo.gif" alt="Widget Spotify Demo" class="demo-gif">
-                    </div>
-                </div>
-            </div>
-        </section>
+        <h1 data-en="Your music, <span class=&quot;accent-text&quot;>one click</span> from the tray."
+          data-it="La tua musica, <span class=&quot;accent-text&quot;>a un clic</span> dalla tray.">
+          Your music, <span class="accent-text">one click</span> from the tray.
+        </h1>
 
-        <section class="features scroll-element">
-            <div class="container">
-                <h2 class="section-title">Everything you need, <span>nothing you don't.</span></h2>
-                
-                <div class="feature-grid">
-                    <div class="feature-card glass-panel">
-                        <div class="icon-wrapper">🎧</div>
-                        <h3>Now Playing</h3>
-                        <p>Beautiful presentation of album art, title, artist, and album straight from your active device.</p>
-                    </div>
-                    
-                    <div class="feature-card glass-panel">
-                        <div class="icon-wrapper">⏯️</div>
-                        <h3>Playback Controls</h3>
-                        <p>Play, pause, skip, go back, shuffle, and repeat. Total control without opening the main app.</p>
-                    </div>
-                    
-                    <div class="feature-card glass-panel">
-                        <div class="icon-wrapper">🎚️</div>
-                        <h3>Smart Seek Bar</h3>
-                        <p>Clickable progress bar with smooth interpolation to easily skip to your favorite part of a song.</p>
-                    </div>
-                    
-                    <div class="feature-card glass-panel">
-                        <div class="icon-wrapper">🔊</div>
-                        <h3>Volume Control</h3>
-                        <p>Adjust the volume or mute your active device instantly using the integrated slider.</p>
-                    </div>
-                    
-                    <div class="feature-card glass-panel">
-                        <div class="icon-wrapper">🖥️</div>
-                        <h3>Device Switcher</h3>
-                        <p>Seamlessly move playback between your PC, phone, or smart speakers (like Amazon Echo).</p>
-                    </div>
-                    
-                    <div class="feature-card glass-panel">
-                        <div class="icon-wrapper">🔒</div>
-                        <h3>Secure & Native</h3>
-                        <p>Uses OAuth PKCE. Refresh token is encrypted with Windows DPAPI. Auto-hides natively.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <p class="lead"
+          data-en="Click the tray icon and a <b>now playing</b> card pops up with controls, a seek bar, volume and a device switcher, without opening the Spotify app."
+          data-it="Clicca l'icona nella tray e compare una scheda con il <b>brano in riproduzione</b>, i comandi, la barra di avanzamento, il volume e il cambio dispositivo, senza aprire l'app di Spotify.">
+          Click the tray icon and a <b>now playing</b> card pops up with controls, a seek bar, volume and a
+          device switcher, without opening the Spotify app.
+        </p>
 
-        <section class="screenshots scroll-element">
-            <div class="container">
-                <h2 class="section-title text-center">A native feel.</h2>
-                <div class="screenshot-grid">
-                    <div class="screenshot-container glass-panel text-center">
-                        <img src="screenshots/tray-menu.png" alt="Tray menu" class="screenshot-img">
-                        <p class="caption">Right-click tray menu</p>
-                    </div>
-                    <div class="screenshot-container glass-panel text-center">
-                        <img src="screenshots/settings.png" alt="Settings window" class="screenshot-img">
-                        <p class="caption">Extensive settings</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section id="guide" class="guide scroll-element">
-            <div class="container">
-                <div class="glass-panel guide-box">
-                    <h2>⚠️ Before you start</h2>
-                    <ul class="requirements-list">
-                        <li>You need a <strong>Spotify Premium</strong> account.</li>
-                        <li>You must create your own free Spotify developer app to get a Client ID.</li>
-                    </ul>
-
-                    <h3>Quick Setup</h3>
-                    <div class="steps">
-                        <div class="step">
-                            <div class="step-num">1</div>
-                            <div class="step-content">
-                                <h4>Download and run</h4>
-                                <p>Get the installer from the <a href="https://github.com/giosci1994/widget-spotify/releases" target="_blank">Releases page</a>. A green icon will appear in your tray.</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-num">2</div>
-                            <div class="step-content">
-                                <h4>Create a Spotify App</h4>
-                                <p>Go to the <a href="https://developer.spotify.com/dashboard" target="_blank">Spotify Developer Dashboard</a> and create a new app. Set the Redirect URI to exactly: <code>http://127.0.0.1:8888/callback</code> and check "Web API".</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-num">3</div>
-                            <div class="step-content">
-                                <h4>Connect the Widget</h4>
-                                <p>Copy your Client ID from the Spotify dashboard. Click the tray icon, paste the ID, and click "Log in with Spotify".</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <div class="container footer-content">
-            <div class="footer-left">
-                <div class="logo">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.54.659.301 1.02zM19.32 14.1c-.3.42-.84.54-1.26.3-3.24-1.98-8.159-2.58-11.94-1.44-.48.18-1.02-.06-1.2-.54-.18-.48.06-1.02.54-1.2 4.32-1.32 9.72-.66 13.56 1.62.42.24.54.84.3 1.26zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.72 1.621.539.3.719 1.02.419 1.56-.299.54-1.02.72-1.56.42z"/></svg>
-                    <span>Widget Spotify</span>
-                </div>
-                <p>Created by giosci1994. Released under the MIT License.</p>
-                <p>Not affiliated with Spotify AB.</p>
-            </div>
+        <div class="hero-actions">
+          <a class="btn primary" href="#download" data-en="Download" data-it="Scarica">Download</a>
+          <a class="btn ghost" href="#setup" data-en="Setup guide" data-it="Guida alla configurazione">Setup guide</a>
         </div>
-    </footer>
 
-    <script src="script.js"></script>
+        <div class="status-note">
+          <span aria-hidden="true">🎧</span>
+          <span data-en="<b>Spotify Premium required</b> for playback commands, plus your own free Spotify app (about 5 minutes)."
+            data-it="<b>Serve Spotify Premium</b> per i comandi di riproduzione, più una tua app Spotify gratuita (circa 5 minuti).">
+            <b>Spotify Premium required</b> for playback commands, plus your own free Spotify app (about 5 minutes).
+          </span>
+        </div>
+
+        <div class="topics" role="list" aria-label="Topics">
+          <span class="pill" role="listitem">spotify</span>
+          <span class="pill" role="listitem">electron</span>
+          <span class="pill" role="listitem">windows</span>
+          <span class="pill" role="listitem">system-tray</span>
+          <span class="pill" role="listitem">oauth-pkce</span>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="window demo">
+          <div class="win-bar">
+            <span class="win-title">widget-spotify · now playing</span>
+          </div>
+          <img src="demo.gif" alt="Widget Spotify demo: controlling playback from the Windows tray" />
+        </div>
+      </div>
+    </section>
+
+    <section id="features" class="section">
+      <div class="section-head reveal">
+        <span class="section-label" data-en="// features" data-it="// funzioni">// features</span>
+        <h2 data-en="Everything you need, nothing you don't" data-it="Tutto quello che serve, niente di più">Everything you need, nothing you don't</h2>
+        <p data-en="It uses the Spotify Web API, so it controls whichever device is active on your account: PC, phone or a smart speaker. The app's interface is in Italian."
+          data-it="Usa la Spotify Web API, quindi comanda il dispositivo attivo sul tuo account: PC, telefono o uno smart speaker. L'interfaccia dell'app è in italiano.">It uses the Spotify Web API, so it controls whichever device is active on your account: PC, phone or a smart speaker. The app's interface is in Italian.</p>
+      </div>
+
+      <div class="cards-grid">
+        <article class="card reveal">
+          <span class="card-icon">🎧</span>
+          <h3 data-en="Now playing" data-it="In riproduzione">Now playing</h3>
+          <p data-en="Album art, title, artist and album of what is playing on the active device."
+            data-it="Copertina, titolo, artista e album di quello che suona sul dispositivo attivo.">Album art, title, artist and album of what is playing on the active device.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card-icon">⏯️</span>
+          <h3 data-en="Playback controls" data-it="Comandi">Playback controls</h3>
+          <p data-en="Play and pause, previous and next, shuffle, repeat (off, all, one)."
+            data-it="Play e pausa, precedente e successivo, casuale, ripeti (no, tutto, uno).">Play and pause, previous and next, shuffle, repeat (off, all, one).</p>
+        </article>
+        <article class="card reveal">
+          <span class="card-icon">🎚️</span>
+          <h3 data-en="Seek bar and volume" data-it="Avanzamento e volume">Seek bar and volume</h3>
+          <p data-en="Click or drag to jump anywhere in the song; volume slider and mute for the active device."
+            data-it="Clicca o trascina per saltare in un punto del brano; volume e muto per il dispositivo attivo.">Click or drag to jump anywhere in the song; volume slider and mute for the active device.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card-icon">🖥️</span>
+          <h3 data-en="Device switcher" data-it="Cambio dispositivo">Device switcher</h3>
+          <p data-en="Move playback between your PC, your phone or speakers such as an Amazon Echo."
+            data-it="Sposta la musica tra PC, telefono o casse come un Amazon Echo.">Move playback between your PC, your phone or speakers such as an Amazon Echo.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card-icon">⚙️</span>
+          <h3 data-en="Your way" data-it="Come vuoi tu">Your way</h3>
+          <p data-en="Screen corner, fade animation, transparency, album-art background, launch at startup. Hides by itself when you click elsewhere."
+            data-it="Angolo dello schermo, dissolvenza, trasparenza, sfondo con la copertina, avvio con Windows. Si nasconde da sola quando clicchi altrove.">Screen corner, fade animation, transparency, album-art background, launch at startup. Hides by itself when you click elsewhere.</p>
+        </article>
+        <article class="card reveal">
+          <span class="card-icon">🔒</span>
+          <h3 data-en="Secure login" data-it="Accesso sicuro">Secure login</h3>
+          <p data-en="OAuth with PKCE, no client secret. The refresh token is encrypted with Windows DPAPI. Automatic updates from GitHub Releases."
+            data-it="OAuth con PKCE, senza client secret. Il token di accesso è cifrato con DPAPI di Windows. Aggiornamenti automatici dalle Releases di GitHub.">OAuth with PKCE, no client secret. The refresh token is encrypted with Windows DPAPI. Automatic updates from GitHub Releases.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="screenshots" class="section">
+      <div class="section-head reveal">
+        <span class="section-label" data-en="// screenshots" data-it="// schermate">// screenshots</span>
+        <h2 data-en="Small and native" data-it="Piccolo e nativo">Small and native</h2>
+      </div>
+
+      <div class="shots-grid two">
+        <figure class="shot reveal">
+          <div class="window"><img src="screenshots/tray-menu.png" alt="Tray menu" loading="lazy" /></div>
+          <figcaption data-en="right-click tray menu" data-it="menu della tray (tasto destro)">right-click tray menu</figcaption>
+        </figure>
+        <figure class="shot reveal">
+          <div class="window"><img src="screenshots/settings.png" alt="Settings window" loading="lazy" /></div>
+          <figcaption data-en="settings" data-it="impostazioni">settings</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="setup" class="section">
+      <div class="section-head reveal">
+        <span class="section-label" data-en="// setup" data-it="// configurazione">// setup</span>
+        <h2 data-en="Connect your Spotify account" data-it="Collega il tuo account Spotify">Connect your Spotify account</h2>
+        <p data-en="Spotify apps start in Development mode and only accept the users their owner added: that is why you need your own free app."
+          data-it="Le app Spotify partono in modalità sviluppo e accettano solo gli utenti aggiunti dal proprietario: per questo serve una tua app, gratuita.">Spotify apps start in Development mode and only accept the users their owner added: that is why you need your own free app.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step reveal">
+          <span class="step-n">1</span>
+          <h3 data-en="Create your Spotify app" data-it="Crea la tua app Spotify">Create your Spotify app</h3>
+          <p data-en="In the <a href=&quot;https://developer.spotify.com/dashboard&quot; target=&quot;_blank&quot; rel=&quot;noreferrer&quot;>Spotify Developer Dashboard</a>, create an app, tick <b>Web API</b> and add the Redirect URI <code>http://127.0.0.1:8888/callback</code>."
+            data-it="Nella <a href=&quot;https://developer.spotify.com/dashboard&quot; target=&quot;_blank&quot; rel=&quot;noreferrer&quot;>Spotify Developer Dashboard</a> crea un'app, spunta <b>Web API</b> e aggiungi il Redirect URI <code>http://127.0.0.1:8888/callback</code>.">In the <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noreferrer">Spotify Developer Dashboard</a>, create an app, tick <b>Web API</b> and add the Redirect URI <code>http://127.0.0.1:8888/callback</code>.</p>
+        </div>
+        <div class="step reveal">
+          <span class="step-n">2</span>
+          <h3 data-en="Add yourself" data-it="Aggiungi te stesso">Add yourself</h3>
+          <p data-en="Copy the <b>Client ID</b> (no secret needed) and, under <b>User Management</b>, add the email of your Spotify account."
+            data-it="Copia il <b>Client ID</b> (il secret non serve) e, in <b>User Management</b>, aggiungi l'email del tuo account Spotify.">Copy the <b>Client ID</b> (no secret needed) and, under <b>User Management</b>, add the email of your Spotify account.</p>
+        </div>
+        <div class="step reveal">
+          <span class="step-n">3</span>
+          <h3 data-en="Log in" data-it="Accedi">Log in</h3>
+          <p data-en="Click the tray icon, paste the Client ID, then <b>Accedi con Spotify</b> (Log in with Spotify) and approve."
+            data-it="Clicca l'icona nella tray, incolla il Client ID, poi <b>Accedi con Spotify</b> e approva.">Click the tray icon, paste the Client ID, then <b>Accedi con Spotify</b> (Log in with Spotify) and approve.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="download" class="section">
+      <div class="section-head reveal">
+        <span class="section-label" data-en="// download" data-it="// scarica">// download</span>
+        <h2 data-en="Installer or portable" data-it="Installer o portatile">Installer or portable</h2>
+        <p data-en="The installer updates itself; the portable exe runs without installing and does not update."
+          data-it="L'installer si aggiorna da solo; l'exe portatile parte senza installare e non si aggiorna.">The installer updates itself; the portable exe runs without installing and does not update.</p>
+      </div>
+
+      <div class="quickstart reveal">
+<pre><code data-en="powershell -ExecutionPolicy Bypass -File .\VERIFY.ps1
+# or by hand, then compare with SHA256SUMS.txt:
+Get-FileHash .\WidgetSpotify-Setup-x.y.z.exe -Algorithm SHA256"
+  data-it="powershell -ExecutionPolicy Bypass -File .\VERIFY.ps1
+# oppure a mano, poi confronta con SHA256SUMS.txt:
+Get-FileHash .\WidgetSpotify-Setup-x.y.z.exe -Algorithm SHA256">powershell -ExecutionPolicy Bypass -File .\VERIFY.ps1
+# or by hand, then compare with SHA256SUMS.txt:
+Get-FileHash .\WidgetSpotify-Setup-x.y.z.exe -Algorithm SHA256</code></pre>
+        <p class="hint" data-en="From the next release, <code>SHA256SUMS.txt</code> and <code>VERIFY.ps1</code> come with every release. The exe is not code-signed: if SmartScreen warns you, choose <b>More info → Run anyway</b>."
+          data-it="Dalla prossima versione, <code>SHA256SUMS.txt</code> e <code>VERIFY.ps1</code> sono in ogni release. L'exe non è firmato: se SmartScreen avvisa, scegli <b>Ulteriori informazioni → Esegui comunque</b>.">From the next release, <code>SHA256SUMS.txt</code> and <code>VERIFY.ps1</code> come with every release. The exe is not code-signed: if SmartScreen warns you, choose <b>More info → Run anyway</b>.</p>
+      </div>
+
+      <div class="cta-box reveal">
+        <div>
+          <h3 data-en="Latest release" data-it="Ultima versione">Latest release</h3>
+          <p data-en="<code>WidgetSpotify-Setup-x.y.z.exe</code> and <code>WidgetSpotify-portable-x.y.z.exe</code> on GitHub Releases."
+            data-it="<code>WidgetSpotify-Setup-x.y.z.exe</code> e <code>WidgetSpotify-portable-x.y.z.exe</code> nelle Releases di GitHub."><code>WidgetSpotify-Setup-x.y.z.exe</code> and <code>WidgetSpotify-portable-x.y.z.exe</code> on GitHub Releases.</p>
+        </div>
+        <a class="btn primary" href="https://github.com/giosci1994/widget-spotify/releases/latest" target="_blank"
+          rel="noreferrer" data-en="Go to Releases" data-it="Vai alle Releases">Go to Releases</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <div class="footer-left">
+      <span aria-hidden="true">🎵</span>
+      <span>© <span id="year">2026</span> giosci1994 · <span data-en="MIT License · not affiliated with Spotify" data-it="Licenza MIT · non affiliato a Spotify">MIT License · not affiliated with Spotify</span></span>
+    </div>
+    <div class="footer-right">
+      <a href="https://github.com/giosci1994/widget-spotify" target="_blank" rel="noreferrer">GitHub</a>
+      <a href="https://github.com/giosci1994/widget-spotify/releases" target="_blank" rel="noreferrer">Releases</a>
+      <a href="https://buymeacoffee.com/giosci1994u" target="_blank" rel="noreferrer">☕ Buy Me a Coffee</a>
+    </div>
+  </footer>
 </body>
+
 </html>

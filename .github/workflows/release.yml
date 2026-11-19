@@ -40,6 +40,16 @@ jobs:
       - name: Build installer + portable
         run: npx electron-builder --publish never
 
+      # SHA256SUMS.txt e VERIFY.ps1: chi scarica può controllare che gli .exe siano quelli originali.
+      - name: SHA256SUMS.txt and VERIFY.ps1
+        shell: pwsh
+        run: |
+          Get-ChildItem dist -Filter *.exe | Sort-Object Name |
+            ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name } |
+            Set-Content -Path dist/SHA256SUMS.txt -Encoding ascii
+          Copy-Item scripts/VERIFY.ps1 dist/VERIFY.ps1
+          Get-Content dist/SHA256SUMS.txt
+
       # latest.yml e i .blockmap servono all'auto-update (electron-updater):
       # senza di essi l'app installata non si accorge della nuova versione.
       - name: Publish GitHub Release
@@ -49,7 +59,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           shopt -s nullglob
-          files=(dist/*.exe dist/latest.yml dist/*.blockmap)
+          files=(dist/*.exe dist/latest.yml dist/*.blockmap dist/SHA256SUMS.txt dist/VERIFY.ps1)
           echo "Asset da pubblicare:"; printf ' - %s\n' "${files[@]}"
           gh release create "$GITHUB_REF_NAME" "${files[@]}" \
             --title "Widget Spotify $GITHUB_REF_NAME" \
@@ -63,4 +73,6 @@ jobs:
           path: |
             dist/*.exe
             dist/latest.yml
+            dist/SHA256SUMS.txt
+            dist/VERIFY.ps1
           if-no-files-found: error
