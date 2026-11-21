@@ -4,6 +4,8 @@
 Click the tray icon and a "now playing" card pops up with playback controls, a seek bar,
 volume and a device switcher, without opening the Spotify app.
 
+### 🌐 [giosci1994.github.io/widget-spotify](https://giosci1994.github.io/widget-spotify/)
+
 <p align="center">
   <a href="https://github.com/giosci1994/widget-spotify/actions/workflows/ci.yml"><img src="https://github.com/giosci1994/widget-spotify/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <a href="https://github.com/giosci1994/widget-spotify/actions/workflows/release.yml"><img src="https://github.com/giosci1994/widget-spotify/actions/workflows/release.yml/badge.svg" alt="Build" /></a>
@@ -86,6 +88,16 @@ Download the latest version from the **[Releases page](https://github.com/giosci
 
 Run it and a green icon appears in the system tray (you may need to click the **^** arrow
 in the taskbar to see it).
+
+**Verify the download** (from the next release): every release also has `SHA256SUMS.txt` and
+`VERIFY.ps1`. Put them in the same folder as the exe and run, in PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\VERIFY.ps1
+```
+
+or by hand: `Get-FileHash .\WidgetSpotify-Setup-x.y.z.exe -Algorithm SHA256`, then compare the hash
+with `SHA256SUMS.txt`.
 
 > **Windows SmartScreen:** the executables are not code-signed, so Windows may show a
 > warning the first time. Click **More info → Run anyway**.
@@ -266,8 +278,8 @@ src/
   renderer/             the card (HTML, CSS, JS)
   settings/             the settings window
   shared/theme.css      styles shared by the card and the settings window
-scripts/                icon and social-preview generators
-docs/                   GitHub Pages landing page, screenshots, demo GIF
+scripts/                icon and social-preview generators, VERIFY.ps1 (shipped with each release)
+docs/                   GitHub Pages landing page (EN/IT), screenshots, demo GIF
 assets/                 app and tray icons
 ```
 
@@ -277,7 +289,8 @@ assets/                 app and tray icons
   ([`ci.yml`](.github/workflows/ci.yml)).
 - **Releases** are automatic: push a version tag and
   [`release.yml`](.github/workflows/release.yml) builds on Windows and publishes the release
-  with the installer, the portable exe and the update metadata. The version number comes
+  with the installer, the portable exe, the update metadata, `SHA256SUMS.txt` and
+  `VERIFY.ps1`. The version number comes
   from the tag.
 
   ```bash

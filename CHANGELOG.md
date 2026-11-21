@@ -4,6 +4,15 @@ All notable changes to Widget Spotify are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- `SHA256SUMS.txt` and `VERIFY.ps1` in every release, to check the downloaded exe.
+
+### Changed
+- The landing page uses the same design as the other projects and switches between English
+  and Italian.
+
 ## [0.2.3] - 2026-10-31
 
 ### Changed
