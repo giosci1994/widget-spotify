@@ -310,4 +310,4 @@ If Widget Spotify is useful to you, you can buy me a coffee.
 
 ## 📄 License
 
-[MIT](LICENSE) © giosci1994
+[GNU GPL-3.0](LICENSE) © giosci1994
