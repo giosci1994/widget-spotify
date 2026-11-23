@@ -6,7 +6,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#070b0a" />
+  <meta name="theme-color" content="#f7f8f8" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0b0d0e" />
+  <meta name="color-scheme" content="dark light" />
   <meta name="description"
     content="A tiny Spotify remote that lives in the Windows system tray: now playing, controls, seek bar, volume and device switcher, without opening the Spotify app."
     data-en="A tiny Spotify remote that lives in the Windows system tray: now playing, controls, seek bar, volume and device switcher, without opening the Spotify app."
@@ -21,16 +23,30 @@
   <meta property="og:url" content="https://giosci1994.github.io/widget-spotify/" />
   <meta property="og:image" content="https://giosci1994.github.io/widget-spotify/social-preview.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="icon"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B5%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%2300b585'/%3E%3Cpath d='M13 10.5v11l9-5.5z' fill='%2304110d'/%3E%3C/svg%3E" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
+  <script>
+    /* Entrance animation only when motion is allowed. If Motion never loads, the class is removed and nothing stays hidden. */
+    (function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return;
+      var root = document.documentElement;
+      root.classList.add('motion-ready');
+      window.__wsReveal = setTimeout(function () { root.classList.remove('motion-ready'); }, 1500);
+    })();
+  </script>
   <link rel="stylesheet" href="./css/style.css" />
+  <!-- Optional motion (motion.dev). The page works the same without it. -->
+  <script src="https://cdn.jsdelivr.net/npm/motion@14.10.1/dist/motion.js" defer
+    integrity="sha384-lnXs/o2QVHbH7aNA9JGkcMdW38AWVgMHWWrPU/fGgHi+eRj2j0a8va/1nlijpjHX" crossorigin="anonymous"
+    onerror="document.documentElement.classList.remove('motion-ready')"></script>
   <script src="./js/main.js" defer></script>
 </head>
 
@@ -43,12 +59,12 @@
     <div class="container nav-inner">
       <div class="brand">
         <a class="brand-main" href="#top" aria-label="Widget Spotify">
-          <span class="brand-mark" aria-hidden="true">🎵</span>
+          <span class="brand-mark" aria-hidden="true"><svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15"/><path d="M13 10.5v11l9-5.5z"/></svg></span>
           <span>Widget Spotify</span>
         </a>
       </div>
 
-      <nav class="nav-links" aria-label="Primary">
+      <nav id="primary-nav" class="nav-links" aria-label="Primary">
         <a href="#features" data-en="Features" data-it="Funzioni">Features</a>
         <a href="#screenshots" data-en="Screenshots" data-it="Schermate">Screenshots</a>
         <a href="#setup" data-en="Setup" data-it="Configurazione">Setup</a>
@@ -56,6 +72,10 @@
       </nav>
 
       <div class="nav-cta">
+        <button id="menu-toggle" class="btn ghost small menu-btn" type="button" aria-expanded="false"
+          aria-controls="primary-nav" aria-label="Open menu" hidden>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path class="i-open" d="M4 7h16M4 12h16M4 17h16"/><path class="i-close" d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
         <button id="lang-toggle" class="btn ghost small lang-btn" type="button" aria-label="Passa all'italiano">IT</button>
         <a class="btn primary small" href="https://github.com/giosci1994/widget-spotify" target="_blank"
           rel="noreferrer">GitHub</a>
@@ -65,15 +85,15 @@
 
   <main id="top" class="container">
     <section class="hero">
-      <div class="hero-left">
+      <div class="hero-left reveal">
         <div class="kicker">
           <span class="dot"></span>
           <span data-en="Windows 10 / 11 · Open source · GPL-3.0" data-it="Windows 10 / 11 · Open source · GPL-3.0">Windows 10 / 11 · Open source · GPL-3.0</span>
         </div>
 
-        <h1 data-en="Your music, <span class=&quot;accent-text&quot;>one click</span> from the tray."
-          data-it="La tua musica, <span class=&quot;accent-text&quot;>a un clic</span> dalla tray.">
-          Your music, <span class="accent-text">one click</span> from the tray.
+        <h1 data-en="Your music, <span class=&quot;accent-text&quot;>one click</span> from the tray"
+          data-it="La tua musica, <span class=&quot;accent-text&quot;>a un clic</span> dalla tray">
+          Your music, <span class="accent-text">one click</span> from the tray
         </h1>
 
         <p class="lead"
@@ -89,7 +109,7 @@
         </div>
 
         <div class="status-note">
-          <span aria-hidden="true">🎧</span>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></svg>
           <span data-en="<b>Spotify Premium required</b> for playback commands, plus your own free Spotify app (about 5 minutes)."
             data-it="<b>Serve Spotify Premium</b> per i comandi di riproduzione, più una tua app Spotify gratuita (circa 5 minuti).">
             <b>Spotify Premium required</b> for playback commands, plus your own free Spotify app (about 5 minutes).
@@ -105,12 +125,20 @@
         </div>
       </div>
 
-      <div class="hero-right">
+      <div class="hero-right reveal">
         <div class="window demo">
           <div class="win-bar">
             <span class="win-title">widget-spotify · now playing</span>
           </div>
-          <img src="demo.gif" alt="Widget Spotify demo: controlling playback from the Windows tray" />
+          <div class="desk">
+            <img src="demo.gif" alt="Widget Spotify demo: controlling playback from the Windows tray" />
+            <div class="taskbar" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></svg>
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></svg>
+              <svg class="icon" viewBox="0 0 24 24"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/></svg>
+              <span class="tray-app"><svg class="mark" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15"/><path d="M13 10.5v11l9-5.5z"/></svg></span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -125,37 +153,37 @@
 
       <div class="cards-grid">
         <article class="card reveal">
-          <span class="card-icon">🎧</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M6 12c0-1.7.7-3.2 1.8-4.2"/><circle cx="12" cy="12" r="2"/><path d="M18 12c0 1.7-.7 3.2-1.8 4.2"/></svg></span>
           <h3 data-en="Now playing" data-it="In riproduzione">Now playing</h3>
           <p data-en="Album art, title, artist and album of what is playing on the active device."
             data-it="Copertina, titolo, artista e album di quello che suona sul dispositivo attivo.">Album art, title, artist and album of what is playing on the active device.</p>
         </article>
         <article class="card reveal">
-          <span class="card-icon">⏯️</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></svg></span>
           <h3 data-en="Playback controls" data-it="Comandi">Playback controls</h3>
           <p data-en="Play and pause, previous and next, shuffle, repeat (off, all, one)."
             data-it="Play e pausa, precedente e successivo, casuale, ripeti (no, tutto, uno).">Play and pause, previous and next, shuffle, repeat (off, all, one).</p>
         </article>
         <article class="card reveal">
-          <span class="card-icon">🎚️</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg></span>
           <h3 data-en="Seek bar and volume" data-it="Avanzamento e volume">Seek bar and volume</h3>
           <p data-en="Click or drag to jump anywhere in the song; volume slider and mute for the active device."
             data-it="Clicca o trascina per saltare in un punto del brano; volume e muto per il dispositivo attivo.">Click or drag to jump anywhere in the song; volume slider and mute for the active device.</p>
         </article>
         <article class="card reveal">
-          <span class="card-icon">🖥️</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h8"/><path d="M10 19v-3.96 3.15"/><path d="M7 19h5"/><rect width="6" height="10" x="16" y="12" rx="2"/></svg></span>
           <h3 data-en="Device switcher" data-it="Cambio dispositivo">Device switcher</h3>
           <p data-en="Move playback between your PC, your phone or speakers such as an Amazon Echo."
             data-it="Sposta la musica tra PC, telefono o casse come un Amazon Echo.">Move playback between your PC, your phone or speakers such as an Amazon Echo.</p>
         </article>
         <article class="card reveal">
-          <span class="card-icon">⚙️</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg></span>
           <h3 data-en="Your way" data-it="Come vuoi tu">Your way</h3>
           <p data-en="Screen corner, fade animation, transparency, album-art background, launch at startup. Hides by itself when you click elsewhere."
             data-it="Angolo dello schermo, dissolvenza, trasparenza, sfondo con la copertina, avvio con Windows. Si nasconde da sola quando clicchi altrove.">Screen corner, fade animation, transparency, album-art background, launch at startup. Hides by itself when you click elsewhere.</p>
         </article>
         <article class="card reveal">
-          <span class="card-icon">🔒</span>
+          <span class="card-icon"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
           <h3 data-en="Secure login" data-it="Accesso sicuro">Secure login</h3>
           <p data-en="OAuth with PKCE, no client secret. The refresh token is encrypted with Windows DPAPI. Automatic updates from GitHub Releases."
             data-it="OAuth con PKCE, senza client secret. Il token di accesso è cifrato con DPAPI di Windows. Aggiornamenti automatici dalle Releases di GitHub.">OAuth with PKCE, no client secret. The refresh token is encrypted with Windows DPAPI. Automatic updates from GitHub Releases.</p>
@@ -246,13 +274,13 @@ Get-FileHash .\WidgetSpotify-Setup-x.y.z.exe -Algorithm SHA256</code></pre>
 
   <footer class="container footer">
     <div class="footer-left">
-      <span aria-hidden="true">🎵</span>
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15"/><path d="M13 10.5v11l9-5.5z"/></svg>
       <span>© <span id="year">2026</span> giosci1994 · <span data-en="GPL-3.0 License · not affiliated with Spotify" data-it="Licenza GPL-3.0 · non affiliato a Spotify">GPL-3.0 License · not affiliated with Spotify</span></span>
     </div>
     <div class="footer-right">
       <a href="https://github.com/giosci1994/widget-spotify" target="_blank" rel="noreferrer">GitHub</a>
       <a href="https://github.com/giosci1994/widget-spotify/releases" target="_blank" rel="noreferrer">Releases</a>
-      <a href="https://buymeacoffee.com/giosci1994u" target="_blank" rel="noreferrer">☕ Buy Me a Coffee</a>
+      <a href="https://buymeacoffee.com/giosci1994u" target="_blank" rel="noreferrer"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/></svg>Buy Me a Coffee</a>
     </div>
   </footer>
 </body>
