@@ -102,7 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Content is visible by default; it is hidden only while Motion is expected (class
   // motion-ready, removed after 1.5 s at most) and never with reduced motion.
   const M = window.Motion;
-  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduceMotion =
+    window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   clearTimeout(window.__wsReveal);
   if (!M || reduceMotion || !M.animate || !M.inView || !root.classList.contains('motion-ready')) {
     root.classList.remove('motion-ready');
