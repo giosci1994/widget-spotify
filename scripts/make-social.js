@@ -53,7 +53,7 @@ app.whenReady().then(async () => {
         <ul>
           <li><span class="chk">✓</span> Now playing, controls &amp; seek</li>
           <li><span class="chk">✓</span> Switch device — Echo / PC / phone</li>
-          <li><span class="chk">✓</span> Album-art background &amp; auto-update</li>
+          <li><span class="chk">✓</span> Six styles, light &amp; dark, compact mode</li>
         </ul>
         <div class="repo">github.com/giosci1994/widget-spotify</div>
       </div>

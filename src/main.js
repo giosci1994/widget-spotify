@@ -8,6 +8,7 @@ const {
   screen,
   clipboard,
   Notification,
+  nativeTheme,
 } = require('electron');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
@@ -23,10 +24,13 @@ let pollGen = 0; // invalida i cicli di polling precedenti
 let fadeTimer = null;
 let lastAuthUrl = null;
 let updateReadyVersion = null;
+let view = 'player'; // cosa mostra la card: player | idle | login
 
-// Devono coincidere con le dimensioni di .card in renderer/style.css
-const WIN_WIDTH = 372;
-const WIN_HEIGHT = 252;
+// Devono coincidere con le misure di .card e .shell in renderer/style.css
+const CARD_WIDTH = 372;
+const CARD_HEIGHT = 252;
+const COMPACT_HEIGHT = 84; // formato compatto: una riga sola
+const GLOW_PAD = 24; // margine trasparente attorno alla card per l'alone del Vetro
 
 // Il polling gira solo mentre la card è visibile
 const POLL_MS = 1000;
@@ -50,9 +54,10 @@ function publicConfig() {
 }
 
 function createWindow() {
+  const size = windowLayout(settings.load());
   win = new BrowserWindow({
-    width: WIN_WIDTH,
-    height: WIN_HEIGHT,
+    width: size.width,
+    height: size.height,
     show: false,
     frame: false,
     resizable: false,
@@ -70,17 +75,44 @@ function createWindow() {
   win.on('blur', () => hideWindow());
 }
 
+// Misure della finestra: la compatta vale solo mentre suona qualcosa (accesso e
+// "nessuna riproduzione" hanno bisogno della card intera); il Vetro ha l'alone attorno.
+function windowLayout(s) {
+  const compact = s.size === 'compact' && view === 'player';
+  const pad = s.style === 'glass' ? GLOW_PAD : 0;
+  return {
+    pad,
+    width: CARD_WIDTH + 2 * pad,
+    height: (compact ? COMPACT_HEIGHT : CARD_HEIGHT) + 2 * pad,
+  };
+}
+
 // Posiziona la card nell'angolo scelto, dentro la workArea (esclude la barra).
+// Il margine dell'alone è trasparente: la card resta a 12 px dal bordo.
 function positionWindow() {
   const s = settings.load();
   const cursor = screen.getCursorScreenPoint();
   const display = screen.getDisplayNearestPoint(cursor);
   const { x, y, width, height } = display.workArea;
   const m = 12;
+  const { pad, width: w, height: h } = windowLayout(s);
   const corner = s.corner || 'bottom-right';
-  const winX = corner.includes('left') ? x + m : x + width - WIN_WIDTH - m;
-  const winY = corner.includes('top') ? y + m : y + height - WIN_HEIGHT - m;
-  win.setPosition(Math.round(winX), Math.round(winY));
+  const winX = corner.includes('left') ? x + m - pad : x + width - w - m + pad;
+  const winY = corner.includes('top') ? y + m - pad : y + height - h - m + pad;
+  win.setBounds({ x: Math.round(winX), y: Math.round(winY), width: w, height: h });
+}
+
+// La card è passata a un'altra schermata: se serve, cambia la misura della finestra
+function setView(next) {
+  if (next === view) return;
+  view = next;
+  if (alive(win) && win.isVisible()) positionWindow();
+}
+
+// Tema effettivo: "system" segue il tema chiaro/scuro di Windows
+function resolvedTheme(s) {
+  if (s.theme === 'light' || s.theme === 'dark') return s.theme;
+  return nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
 }
 
 // Dissolvenza dell'opacità della finestra fino a "target".
@@ -131,7 +163,9 @@ function toggleWindow() {
 }
 
 function pushSettings() {
-  if (alive(win)) win.webContents.send('settings', settings.load());
+  if (!alive(win)) return;
+  const s = settings.load();
+  win.webContents.send('settings', { ...s, resolvedTheme: resolvedTheme(s) });
 }
 
 function applySettings(s) {
@@ -150,7 +184,7 @@ function openSettings() {
   }
   settingsWin = new BrowserWindow({
     width: 400,
-    height: 548,
+    height: 640,
     resizable: false,
     frame: false,
     backgroundColor: '#17171c',
@@ -170,8 +204,10 @@ function openSettings() {
 function normalize(s) {
   if (!s || !s.item) return { active: false };
   const item = s.item;
-  const img =
-    item.album && item.album.images && item.album.images.length ? item.album.images[0].url : null;
+  const images = (item.album && item.album.images) || [];
+  // la più grande per la copertina, la più piccola per leggere i colori (stile Ambiente)
+  const img = images.length ? images[0].url : null;
+  const imgSmall = images.length ? images[images.length - 1].url : null;
   return {
     active: true,
     isPlaying: !!s.is_playing,
@@ -180,6 +216,7 @@ function normalize(s) {
     artists: (item.artists || []).map((a) => a.name).join(', '),
     album: item.album ? item.album.name : '',
     image: img,
+    imageSmall: imgSmall,
     durationMs: item.duration_ms || 0,
     progressMs: s.progress_ms || 0,
     shuffle: !!s.shuffle_state,
@@ -197,6 +234,7 @@ function normalize(s) {
 }
 
 function sendLoggedOut() {
+  setView('login');
   win.webContents.send('auth-state', { authed: false, config: publicConfig() });
 }
 
@@ -210,7 +248,10 @@ async function refreshNow() {
       return 0;
     }
     const state = await spotify.getPlaybackState();
-    if (alive(win)) win.webContents.send('playback', normalize(state));
+    if (!alive(win)) return 0;
+    const data = normalize(state);
+    setView(data.active ? 'player' : 'idle');
+    win.webContents.send('playback', data);
   } catch (e) {
     if (e && e.status === 429) return e.retryAfterMs;
     if (!alive(win)) return 0;
@@ -421,6 +462,8 @@ if (!gotLock) {
   app.whenReady().then(async () => {
     createWindow();
     buildTray();
+    // tema "come Windows": la card si aggiorna quando cambia il tema del sistema
+    nativeTheme.on('updated', pushSettings);
     setupAutoUpdate();
     if (auth.hasStoredAuth()) {
       try {

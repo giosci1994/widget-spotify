@@ -10,7 +10,10 @@ let state = null; // ultimo stato di riproduzione
 let baseline = null; // { progressMs, durationMs, isPlaying, at }
 let seeking = false;
 let toastTimer = null;
-let uiSettings = { albumBackground: false };
+let uiSettings = {};
+let current = 'player'; // sezione mostrata
+let ambient = null; // colori letti dalla copertina (stile Ambiente)
+let ambientFor = null; // copertina a cui si riferiscono
 let volDragging = false;
 let volLockUntil = 0; // ignora gli update in arrivo subito dopo una modifica
 let lastVolume = 40; // per il ripristino dopo il muto
@@ -20,9 +23,12 @@ let volThrottle = 0;
 const fillEl = $('fill');
 const knobEl = $('knob');
 const curEl = $('cur');
+const durEl = $('dur');
 
 function show(name) {
+  current = name;
   for (const k in sections) sections[k].classList.toggle('hidden', k !== name);
+  applyLayout();
 }
 
 function fmt(ms) {
@@ -67,7 +73,7 @@ function renderPlayback(s) {
   if (!s || !s.active) {
     state = null;
     baseline = null;
-    updateBackground();
+    document.body.classList.remove('playing');
     show('idle');
     return;
   }
@@ -87,16 +93,19 @@ function renderPlayback(s) {
     $('album').textContent = s.album || '';
     if (s.image) $('cover').src = s.image;
     else $('cover').removeAttribute('src');
-    updateBackground();
+    paintArtwork();
+    swapIn();
   }
 
   paintPlayIcon(s.isPlaying);
   paintShuffle(s.shuffle);
   paintRepeat(s.repeat);
+  document.body.classList.toggle('playing', !!s.isPlaying);
 
-  // dispositivo
+  // dispositivo: dove suona, sopra il titolo
   $('deviceBtn').classList.toggle('active', !!s.device);
-  $('dur').textContent = fmt(s.durationMs);
+  $('whereName').textContent = s.device ? s.device.name : '';
+  $('where').classList.toggle('hidden', !s.device);
 
   // volume
   const vol = s.device ? s.device.volume : null;
@@ -117,11 +126,15 @@ function paintRepeat(mode) {
   $('repeatOne').classList.toggle('hidden', mode !== 'track');
 }
 
+// Tempo trascorso a sinistra, tempo che manca a destra
 function paintProgress(posMs, durationMs) {
   const pct = durationMs ? (posMs / durationMs) * 100 : 0;
   fillEl.style.width = pct + '%';
   knobEl.style.left = pct + '%';
-  curEl.textContent = fmt(posMs);
+  const cur = fmt(posMs);
+  const left = '-' + fmt(durationMs - posMs);
+  if (curEl.textContent !== cur) curEl.textContent = cur;
+  if (durEl.textContent !== left) durEl.textContent = left;
 }
 
 // Posizione stimata: ultima posizione nota + tempo trascorso (se in riproduzione)
@@ -350,28 +363,182 @@ $('clientIdInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') saveClientId();
 });
 
-/* ---------- Impostazioni (sfondo copertina) ---------- */
+/* ---------- Aspetto: stile, tema, formato, animazioni ---------- */
 
-function updateBackground() {
-  const bg = $('bg');
-  const scrim = $('scrim');
-  const on = !!(uiSettings.albumBackground && state && state.image);
-  if (on) {
-    bg.style.backgroundImage = `url("${state.image}")`;
-    bg.classList.remove('hidden');
-    scrim.classList.remove('hidden');
-  } else {
-    bg.classList.add('hidden');
-    scrim.classList.add('hidden');
+// Classi sul <body> lette da style.css (vedi l'intestazione del file)
+function applyLayout() {
+  const st = uiSettings;
+  const body = document.body;
+  const keep = ['playing'].filter((c) => body.classList.contains(c));
+  body.className = [
+    ...keep,
+    's-' + (st.style || 'ambient'),
+    't-' + (st.resolvedTheme || 'dark'),
+    'pal-' + (st.auroraPalette || 'night'),
+    'glow-' + (st.glassGlow || 'soft'),
+    st.animations === false ? '' : 'anim',
+    // la compatta vale solo per il player: accesso e "nessuna riproduzione" restano interi
+    st.size === 'compact' && current === 'player' ? 'compact' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  paintAmbient();
+}
+
+// Cambio brano: copertina e testi entrano con una dissolvenza breve
+function swapIn() {
+  for (const node of [$('meta'), document.querySelector('.art-wrap')]) {
+    node.classList.remove('swap');
+    void node.offsetWidth; // riavvia l'animazione
+    node.classList.add('swap');
   }
-  $('card').classList.toggle('has-bg', on);
+}
+
+// Copertina come sfondo (Poster) e colori della copertina (Ambiente)
+function paintArtwork() {
+  const art = $('layerArt');
+  if (state && state.image) art.style.backgroundImage = `url("${state.image}")`;
+  else art.style.removeProperty('background-image');
+  const src = state && (state.imageSmall || state.image);
+  if (!src) {
+    ambient = null;
+    ambientFor = null;
+    paintAmbient();
+    return;
+  }
+  if (src === ambientFor) return;
+  ambientFor = src;
+  readColors(src).then((colors) => {
+    if (ambientFor !== src) return; // nel frattempo è cambiato brano
+    ambient = colors;
+    paintAmbient();
+  });
+}
+
+// Legge i colori principali di un'immagine rimpicciolita a 24x24.
+// Se la copertina non si può leggere (CORS) restano i colori di partenza dello stile.
+function readColors(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onerror = () => resolve(null);
+    img.onload = () => {
+      try {
+        const N = 24;
+        const canvas = document.createElement('canvas');
+        canvas.width = N;
+        canvas.height = N;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, N, N);
+        const px = ctx.getImageData(0, 0, N, N).data;
+        const avg = (x0, y0, x1, y1) => {
+          let r = 0;
+          let g = 0;
+          let b = 0;
+          let n = 0;
+          for (let y = y0; y < y1; y++) {
+            for (let x = x0; x < x1; x++) {
+              const i = (y * N + x) * 4;
+              r += px[i];
+              g += px[i + 1];
+              b += px[i + 2];
+              n++;
+            }
+          }
+          return [r / n, g / n, b / n];
+        };
+        // il colore più vivo diventa l'accento
+        let vivid = null;
+        let best = -1;
+        for (let i = 0; i < px.length; i += 4) {
+          const [h, sat, l] = toHsl([px[i], px[i + 1], px[i + 2]]);
+          const score = sat * (1 - Math.abs(l - 0.55) * 1.6);
+          if (score > best) {
+            best = score;
+            vivid = [h, sat, l];
+          }
+        }
+        const half = N / 2;
+        resolve({
+          all: toHsl(avg(0, 0, N, N)),
+          c1: toHsl(avg(0, 0, half, half)), // in alto a sinistra
+          c2: toHsl(avg(half, half, N, N)), // in basso a destra
+          c3: toHsl(avg(half, 0, N, half)), // in alto a destra
+          vivid,
+        });
+      } catch (e) {
+        resolve(null);
+      }
+    };
+    img.src = src;
+  });
+}
+
+function toHsl([r, g, b]) {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return [0, 0, l];
+  const d = max - min;
+  const sat = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h;
+  if (max === r) h = (g - b) / d + (g < b ? 6 : 0);
+  else if (max === g) h = (b - r) / d + 2;
+  else h = (r - g) / d + 4;
+  return [h * 60, sat, l];
+}
+
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const hsl = ([h, sat, l], a = 1) =>
+  `hsla(${Math.round(h)}, ${Math.round(sat * 100)}%, ${Math.round(l * 100)}%, ${a})`;
+
+// Variabili --amb-* della card: sfondo scuro o chiaro dalla copertina, accento leggibile
+function paintAmbient() {
+  const card = $('card');
+  const names = ['base', 'c1', 'c2', 'c3', 'accent', 'on-accent', 'pop'];
+  if (!ambient) {
+    for (const n of names) card.style.removeProperty('--amb-' + n);
+    return;
+  }
+  const light = uiSettings.resolvedTheme === 'light';
+  const [h, sat] = ambient.all;
+  const [vh, vs] = ambient.vivid;
+  const tone = ([ch, cs, cl], lo, hi, smax) => [ch, Math.min(cs, smax), clamp(cl, lo, hi)];
+  // copertina quasi grigia: accento neutro invece di un colore inventato
+  const grey = vs < 0.12;
+  let vars;
+  if (light) {
+    vars = {
+      base: hsl([h, Math.min(sat, 0.45), 0.95]),
+      c1: hsl(tone(ambient.c1, 0.55, 0.75, 0.8), 0.35),
+      c2: hsl(tone(ambient.c2, 0.55, 0.75, 0.8), 0.3),
+      c3: hsl(tone(ambient.c3, 0.55, 0.75, 0.8), 0.3),
+      accent: grey ? '#1d1a1f' : hsl([vh, clamp(vs, 0.45, 0.85), 0.4]),
+      'on-accent': '#fff',
+      pop: '#fff',
+    };
+  } else {
+    vars = {
+      base: hsl([h, Math.min(sat, 0.5), 0.13]),
+      c1: hsl(tone(ambient.c1, 0.25, 0.45, 0.85), 0.85),
+      c2: hsl(tone(ambient.c2, 0.2, 0.4, 0.85), 0.9),
+      c3: hsl(tone(ambient.c3, 0.25, 0.45, 0.85), 0.7),
+      accent: grey ? '#f2f2f4' : hsl([vh, clamp(vs, 0.45, 0.9), 0.66]),
+      'on-accent': hsl([h, Math.min(sat, 0.5), 0.12]),
+      pop: hsl([h, Math.min(sat, 0.4), 0.18], 0.98),
+    };
+  }
+  for (const n of names) card.style.setProperty('--amb-' + n, vars[n]);
 }
 
 /* ---------- Eventi dal main ---------- */
 
 window.spotify.onSettings((s) => {
   uiSettings = s || uiSettings;
-  updateBackground();
+  applyLayout();
 });
 window.spotify.onPlayback((data) => renderPlayback(data));
 window.spotify.onAuthState((info) => {

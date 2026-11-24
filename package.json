@@ -1,6 +1,6 @@
 {
   "name": "widget-spotify",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Mini-telecomando Spotify richiamabile dalla barra delle applicazioni di Windows",
   "main": "src/main.js",
   "engines": {
@@ -10,6 +10,7 @@
     "start": "electron .",
     "make-icon": "node scripts/make-icon.js",
     "make-social": "electron scripts/make-social.js",
+    "make-screenshots": "electron --force-device-scale-factor=2 scripts/make-screenshots.js",
     "dist": "npm run make-icon && electron-builder",
     "pack": "npm run make-icon && electron-builder --dir",
     "lint": "eslint .",
