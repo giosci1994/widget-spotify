@@ -4,14 +4,36 @@ All notable changes to Widget Spotify are listed here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 uses [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.3.0] - Unreleased
 
 ### Added
+- **Six styles** for the card, chosen in the settings: **Vetro** (*Glass*, with a light or
+  full glow), **Aurora** (*Night*, *Sunset*, *Forest*), **Classico** (*Classic*, the look of
+  earlier versions), **Ambiente** (*Ambient*, colours taken from the album art), **Poster**
+  (the album art fills the card) and **Vinile** (*Vinyl*, a record that spins while playing).
+  New installs and updated ones start with **Ambiente**.
+- **Light, dark or like Windows** theme.
+- **Compact** size: a one-line card with album art, title, artist, previous / play / next and a
+  thin progress bar. Login and "nothing playing" still use the full card.
+- **Animations** for track changes, buttons and moving backgrounds, with an on/off switch. They
+  also stay off when Windows' *reduce animations* setting is on.
+- The device that is playing is shown above the title.
+- `npm run make-screenshots` regenerates the images in `docs/screenshots/` with a made-up song.
 - `SHA256SUMS.txt` and `VERIFY.ps1` in every release, to check the downloaded exe.
 
 ### Changed
+- New card layout for every style: bigger album art, titles on up to two lines, a full-width
+  progress bar with the elapsed time and the time left underneath, shuffle and repeat at the
+  sides with a dot when they are on.
+- The settings window is taller (400×640) and groups the options under **Aspetto**
+  (*Appearance*) and **Finestra** (*Window*).
+- New screenshots, demo GIF and social preview.
 - The landing page uses the same design as the other projects and switches between English
   and Italian.
+
+### Removed
+- The **Copertina come sfondo** (*Album-art background*) switch: Ambient, Poster and Vinyl use
+  the album art instead. The old setting is ignored.
 
 ## [0.2.3] - 2026-10-31
 
@@ -71,6 +93,7 @@ uses [Semantic Versioning](https://semver.org/).
 - First release: tray card with now playing, playback controls, seek bar, device switcher,
   settings and OAuth PKCE login.
 
+[0.3.0]: https://github.com/giosci1994/widget-spotify/compare/v0.2.3...v0.3.0
 [0.2.3]: https://github.com/giosci1994/widget-spotify/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/giosci1994/widget-spotify/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/giosci1994/widget-spotify/compare/v0.2.0...v0.2.1

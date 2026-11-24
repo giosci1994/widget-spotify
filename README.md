@@ -2,7 +2,8 @@
 
 **A tiny Spotify remote that lives in the Windows system tray.**
 Click the tray icon and a "now playing" card pops up with playback controls, a seek bar,
-volume and a device switcher, without opening the Spotify app.
+volume and a device switcher, without opening the Spotify app. Pick one of six styles, light or
+dark, or a one-line compact card.
 
 ### 🌐 [giosci1994.github.io/widget-spotify](https://giosci1994.github.io/widget-spotify/)
 
@@ -29,6 +30,7 @@ account: your PC, your phone or a smart speaker such as an Amazon Echo.
 ## Contents
 
 - [Features](#-features)
+- [Styles](#-styles)
 - [Requirements](#-requirements)
 - [Installation](#-installation)
 - [Setup: connect your Spotify account](#-setup-connect-your-spotify-account)
@@ -44,13 +46,19 @@ account: your PC, your phone or a smart speaker such as an Amazon Echo.
 
 ## ✨ Features
 
-- 🎧 **Now playing**: album art, title, artist and album
+- 🎧 **Now playing**: album art, title, artist, album and the device it's playing on
 - ⏯️ **Playback controls**: play/pause, previous/next, shuffle, repeat (off, all, one)
-- 🎚️ **Seek bar**: click or drag to jump to any point; it moves smoothly between updates
+- 🎚️ **Seek bar**: click or drag to jump to any point; it moves smoothly between updates and
+  shows the time left
 - 🔊 **Volume**: slider and mute button for the active device
 - 🖥️ **Device switcher**: move playback between your PC, phone or speakers
 - 🪟 **Lives in the tray**: one click to show or hide; it hides by itself when you click elsewhere
-- ⚙️ **Settings**: screen corner, fade animation, transparency, album-art background, launch at startup
+- 🎨 **Six styles**: Glass, Aurora, Classic, Ambient (colours taken from the album art), Poster
+  and Vinyl. See [Styles](#-styles)
+- 🌓 **Light, dark or like Windows**, and a **compact** one-line card
+- ✨ **Animations** for track changes, buttons and moving backgrounds, with an on/off switch
+  (they also follow Windows' *reduce animations* setting)
+- ⚙️ **Settings**: style, theme, size, animations, screen corner, fade, transparency, launch at startup
 - 🔄 **Automatic updates** from GitHub Releases (installer version)
 - 🔒 **Secure login**: OAuth with PKCE, so no client secret is needed. The refresh token is
   encrypted with Windows DPAPI.
@@ -58,7 +66,37 @@ account: your PC, your phone or a smart speaker such as an Amazon Echo.
 <p align="center">
   <img src="docs/screenshots/tray-menu.png" width="200" alt="Tray menu" />
   &nbsp;&nbsp;
-  <img src="docs/screenshots/settings.png" width="320" alt="Settings window" />
+  <img src="docs/screenshots/settings.png" width="250" alt="Settings window" />
+</p>
+
+---
+
+## 🎨 Styles
+
+Choose the style in **Impostazioni** (*Settings*). New installs and updated ones start with
+**Ambiente** (*Ambient*).
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/styles/ambient.png" width="260" alt="Ambient style" /><br /><b>Ambiente</b> (<i>Ambient</i>): background and accent colour from the album art</td>
+    <td align="center"><img src="docs/screenshots/styles/glass.png" width="260" alt="Glass style" /><br /><b>Vetro</b> (<i>Glass</i>): rainbow edge and glow, light or full</td>
+    <td align="center"><img src="docs/screenshots/styles/aurora.png" width="260" alt="Aurora style" /><br /><b>Aurora</b>: slowly moving colours: Night, Sunset or Forest</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/styles/classic.png" width="260" alt="Classic style" /><br /><b>Classico</b> (<i>Classic</i>): dark and Spotify green, like earlier versions</td>
+    <td align="center"><img src="docs/screenshots/styles/poster.png" width="260" alt="Poster style" /><br /><b>Poster</b>: the album art fills the card</td>
+    <td align="center"><img src="docs/screenshots/styles/vinyl.png" width="260" alt="Vinyl style" /><br /><b>Vinile</b> (<i>Vinyl</i>): the record slides out of the sleeve and spins</td>
+  </tr>
+</table>
+
+Glass, Aurora, Classic and Ambient also have a light theme. The **compact** card is one line:
+album art, title and artist, previous / play / next and a thin progress bar (no volume or
+device switcher).
+
+<p align="center">
+  <img src="docs/screenshots/styles/ambient-light.png" width="300" alt="Ambient style, light theme" />
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/compact.png" width="300" alt="Compact card" />
 </p>
 
 ---
@@ -142,7 +180,9 @@ else.
 On the card:
 - Click or drag the **progress bar** to seek, and the **volume bar** to change volume.
   Click the speaker icon to mute or unmute.
-- Click the **screen icon** at the top right to pick the device to play on.
+- Click the **screen icon** at the top right to pick the device to play on. The name of the
+  device that is playing is shown above the title.
+- The time on the right of the progress bar is the time left in the song.
 - If nothing is playing, start a song in Spotify, or click **Scegli dispositivo**
   (*Choose device*) to start playback on a device.
 
@@ -162,10 +202,13 @@ Changes are saved and applied immediately.
 
 | Setting | What it does |
 |---|---|
+| **Aspetto** (*Appearance*) | The style: Vetro, Aurora, Classico, Ambiente, Poster or Vinile (see [Styles](#-styles)). Glass has a light or full glow, Aurora three colour sets |
+| **Tema** (*Theme*) | Chiaro, Scuro or Windows (*Light*, *Dark* or *like Windows*). Poster and Vinyl are always dark |
+| **Formato** (*Size*) | Normale or Compatto (*Normal* or *Compact*: one line, without volume and device switcher) |
+| **Animazioni** (*Animations*) | Track change, buttons and moving backgrounds |
 | **Angolo di comparsa** (*Corner*) | Which corner of the screen the card appears in |
 | **Dissolvenza** (*Fade*) | Fade the card in and out |
 | **Trasparenza** (*Transparency*) | Card opacity, from 50% to 100% |
-| **Copertina come sfondo** (*Album-art background*) | Use a blurred copy of the album art as the card background |
 | **Avvia all'accensione** (*Launch at startup*) | Start the widget when you log in to Windows |
 
 ---
@@ -263,6 +306,7 @@ Or set the `SPOTIFY_CLIENT_ID` environment variable, which takes precedence over
 | `npm run pack` | Build an unpacked app into `dist/` for a quick test |
 | `npm run dist` | Build the installer and the portable exe into `dist/` |
 | `npm run make-icon` | Regenerate the icons in `assets/` |
+| `npm run make-screenshots` | Regenerate the card and settings images in `docs/screenshots/` with a made-up song (no Spotify account needed) |
 | `npm run make-social` | Regenerate `docs/social-preview.png` from `docs/screenshots/widget.png` |
 
 ### Project structure
@@ -278,7 +322,7 @@ src/
   renderer/             the card (HTML, CSS, JS)
   settings/             the settings window
   shared/theme.css      styles shared by the card and the settings window
-scripts/                icon and social-preview generators, VERIFY.ps1 (shipped with each release)
+scripts/                icon, screenshot and social-preview generators, VERIFY.ps1 (shipped with each release)
 docs/                   GitHub Pages landing page (EN/IT), screenshots, demo GIF
 assets/                 app and tray icons
 ```

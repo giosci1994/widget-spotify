@@ -7,7 +7,22 @@ const DEFAULTS = {
   corner: 'bottom-right', // bottom-right | bottom-left | top-right | top-left
   fade: true, // dissolvenza in apertura/chiusura
   opacity: 1.0, // trasparenza finestra (0.5–1.0)
-  albumBackground: false, // usa la copertina come sfondo del widget
+  style: 'ambient', // glass | aurora | classic | ambient | poster | vinyl
+  glassGlow: 'soft', // alone del Vetro: soft | full
+  auroraPalette: 'night', // colori dell'Aurora: night | sunset | forest
+  theme: 'system', // dark | light | system (come Windows)
+  size: 'normal', // normal | compact
+  animations: true, // cambio brano, pulsanti, sfondo che si muove
+};
+
+// Valori ammessi per le chiavi a scelta: un valore sconosciuto torna a quello di partenza
+const CHOICES = {
+  corner: ['bottom-right', 'bottom-left', 'top-right', 'top-left'],
+  style: ['glass', 'aurora', 'classic', 'ambient', 'poster', 'vinyl'],
+  glassGlow: ['soft', 'full'],
+  auroraPalette: ['night', 'sunset', 'forest'],
+  theme: ['dark', 'light', 'system'],
+  size: ['normal', 'compact'],
 };
 
 let current = null;
@@ -22,6 +37,20 @@ function clampOpacity(v) {
   return Math.max(0.5, Math.min(1.0, n));
 }
 
+// Porta i valori salvati (anche da versioni vecchie) a valori validi. Restano solo le
+// chiavi di DEFAULTS: quelle che non si usano più (es. albumBackground) si tolgono senza errori.
+function normalize(s) {
+  const out = {};
+  for (const key of Object.keys(DEFAULTS)) out[key] = key in s ? s[key] : DEFAULTS[key];
+  for (const [key, allowed] of Object.entries(CHOICES)) {
+    if (!allowed.includes(out[key])) out[key] = DEFAULTS[key];
+  }
+  out.fade = !!out.fade;
+  out.animations = !!out.animations;
+  out.opacity = clampOpacity(out.opacity);
+  return out;
+}
+
 function load() {
   if (current) return current;
   let saved = {};
@@ -30,14 +59,13 @@ function load() {
   } catch (e) {
     /* prima esecuzione o file assente */
   }
-  current = { ...DEFAULTS, ...saved };
-  current.opacity = clampOpacity(current.opacity);
+  if (!saved || typeof saved !== 'object' || Array.isArray(saved)) saved = {};
+  current = normalize(saved);
   return current;
 }
 
 function save(patch) {
-  current = { ...load(), ...(patch || {}) };
-  current.opacity = clampOpacity(current.opacity);
+  current = normalize({ ...load(), ...(patch || {}) });
   try {
     fs.writeFileSync(file(), JSON.stringify(current, null, 2));
   } catch (e) {
@@ -46,4 +74,4 @@ function save(patch) {
   return current;
 }
 
-module.exports = { load, save };
+module.exports = { load, save, normalize, DEFAULTS };
